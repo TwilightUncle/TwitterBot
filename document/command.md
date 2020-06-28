@@ -6,3 +6,12 @@ $ FLASK_APP=run.py flask shell
 >>> db.create_all()
 >>> exit()
 ```
+
+## migrate
+flask-migrateをインストールしたので、db管理はこちらで。上記は忘れる。
+```
+$ flask db init
+$ flask db migrate
+$ flask db upgrade
+$ flask db downgrade
+```
