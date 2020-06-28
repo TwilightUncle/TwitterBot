@@ -9,3 +9,10 @@ class ApplicationConst:
     TWEET_TYPE_WEIGHT_UP = 3
     TWEET_TYPE_WEIGHT_DOWN = 4
     TWEET_TYPE_WEIGHT_ENPTY = 5
+
+    # permissions
+    PERMISSION_ADMIN = 1
+    PERMISSION_BACKEND = 2
+    PERMISSION_NOMAL = 3
+
+constant = ApplicationConst()

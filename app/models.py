@@ -1,4 +1,5 @@
 from app.database import db
+from app.const import constant
 from datetime import datetime
 
 class TweetType(db.Model):
@@ -25,6 +26,7 @@ class User(db.Model):
     id              = db.Column(db.Integer, primary_key=True)
     name            = db.Column(db.Text, nullable=False)
     password        = db.Column(db.Text, nullable=False)
+    permission      = db.Column(db.Integer, default=constant.PERMISSION_NOMAL, nullable=False)
     create_at       = db.Column(db.DateTime, default=datetime.now, nullable=False)
     update_at       = db.Column(db.DateTime, default=datetime.now, nullable=False)
     tweets          = db.relationship("Tweet", backref="tweets")
