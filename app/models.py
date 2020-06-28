@@ -27,4 +27,4 @@ class User(db.Model):
     password        = db.Column(db.Text, nullable=False)
     create_at       = db.Column(db.DateTime, default=datetime.now, nullable=False)
     update_at       = db.Column(db.DateTime, default=datetime.now, nullable=False)
-    tweets          = db.relationship("Tweet", backref="tweet_type")
+    tweets          = db.relationship("Tweet", backref="tweets")
