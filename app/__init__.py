@@ -6,6 +6,7 @@ import app.models
 
 def create_app(config_name='default'):
 
+    # initialize application
     DEV_CONF = 'config.DevelopmentConfig'
     config = {
         'production'    : 'config.ProductionConfig',
@@ -14,17 +15,22 @@ def create_app(config_name='default'):
 
         'default'       : DEV_CONF
         }
-
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_object(config.get(config_name, DEV_CONF))
     app.config.from_pyfile('sensitive_data.cfg')
 
+    # initialize database
     init_db(app)
 
-    # 設定値確認
-    # print(app.config)
+    # register blueprints
+    from app.views import web
+    app.register_blueprint(web.app, url_prefix='/')
+    from app.views import api
+    app.register_blueprint(api.app, url_prefix='/api')
+    from app.views import auth
+    app.register_blueprint(auth.app, url_prefix='/auth')
     
-    # instanceフォルダがあるか確認
+    # check exist instance directory
     try:
         os.makedirs(app.instance_path)
     except OSError:
