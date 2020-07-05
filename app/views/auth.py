@@ -19,9 +19,11 @@ def register():
         # validate
         error = []
         if not username:
-            error.append('Username is required')
+            error.append('Username is required.')
         if not password:
-            error.append('Password is required')
+            error.append('Password is required.')
+        if db.session.query(User).filter(User.name==username).first() is not None:
+            error.append('User {} is already registered.'.format(username))
         # register
         if not error:
             user = User()
