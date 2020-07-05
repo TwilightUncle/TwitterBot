@@ -11,6 +11,8 @@ sqlalchemy = "*"
 flask-sqlalchemy = "*"
 python-dotenv = "*"
 flask-migrate = "*"
+pytest = "*"
+coverage = "*"
 
 [requires]
 python_version = "3.8"
