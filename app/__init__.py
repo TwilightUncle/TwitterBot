@@ -4,8 +4,7 @@ from app.database import init_db
 from app.const import ApplicationConst
 import app.models
 
-def create_app(config_name='default'):
-
+def create_app(config_name='default', db_path=None):
     # initialize application
     DEV_CONF = 'config.DevelopmentConfig'
     config = {
@@ -18,6 +17,8 @@ def create_app(config_name='default'):
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_object(config.get(config_name, DEV_CONF))
     app.config.from_pyfile('sensitive_data.cfg')
+    if db_path:
+        app.config['SQLALCHEMY_DATABASE_URI'] = db_path
 
     # initialize database
     init_db(app)
