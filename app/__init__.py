@@ -24,12 +24,16 @@ def create_app(config_name='default', db_path=None):
     init_db(app)
 
     # register blueprints
+    from app.views import common
+    app.register_blueprint(common.app)
     from app.views import web
-    app.register_blueprint(web.app, url_prefix='/')
+    app.register_blueprint(web.app)
     from app.views import api
     app.register_blueprint(api.app, url_prefix='/api')
     from app.views import auth
     app.register_blueprint(auth.app, url_prefix='/auth')
+
+    app.add_url_rule('/', endpoint='index')
     
     # check exist instance directory
     try:
