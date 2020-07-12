@@ -14,6 +14,9 @@ def app():
 
     app = create_app('testing', 'sqlite:///' + db_path)
 
+    # with open('data1.txt', mode='a') as f:
+    #     f.write('\ntemp db filename: ' + db_path + '\n')
+
     with app.app_context():
         db.create_all()
         user = User()
@@ -24,6 +27,7 @@ def app():
         user2.name = 'other'
         user2.password = generate_password_hash('other')
         db.session.add(user2)
+        db.session.commit()
 
     yield app
 
