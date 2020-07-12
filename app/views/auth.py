@@ -5,17 +5,33 @@ from flask import (
 from werkzeug.security import check_password_hash, generate_password_hash
 from app.database import db
 from app.models import User
+from app.views.common import set_session_message
 
 
 app = Blueprint('auth', __name__)
 
 
+def login_required(view):
+    @functools.wraps(view)
+    def wrapped_view(**kwargs):
+        if g.user is None:
+            set_session_message('Plese login.')
+            session['login_redirect'] = request.url
+            return redirect(url_for('auth.login'))
+
+        return view(**kwargs)
+
+    return wrapped_view
+
+
 @app.route('/register', methods=('GET', 'POST'))
+@login_required
 def register():
     if request.method == 'POST':
         # get input
         username = request.form['username']
         password = request.form['password']
+
         # validate
         error = []
         if not username:
@@ -24,6 +40,7 @@ def register():
             error.append('Password is required.')
         if db.session.query(User).filter(User.name==username).first() is not None:
             error.append('User "{}" is already registered.'.format(username))
+
         # register
         if not error:
             user = User()
@@ -31,8 +48,11 @@ def register():
             user.password = generate_password_hash(password)
             db.session.add(user)
             db.session.commit()
+            set_session_message('Registered user.')
             return redirect(url_for('auth.login'))
+
         flash('\n'.join(error))
+
     return render_template('auth/register.html')
 
 
@@ -42,6 +62,7 @@ def login():
         # get input
         username = request.form['username']
         password = request.form['password']
+
         # validate
         user = db.session.query(User).filter(User.name==username).first()
         error = []
@@ -49,12 +70,22 @@ def login():
             error.append('Incorrect username.')
         elif not check_password_hash(user.password, password):
             error.append('Incorrect password')
+
         # passed
         if not error:
+            # get redirect url
+            redirect_url = session.get('login_redirect')
+            if redirect_url is None:
+                redirect_url = url_for('web.index')
+
+            # login process
             session.clear()
             session['user_id'] = user.id
-            return redirect(url_for('web.index'))
+            set_session_message('You are now logged.')
+            return redirect(redirect_url)
+
         flash('\n'.join(error))
+        
     return render_template('auth/login.html')
 
 
@@ -70,18 +101,8 @@ def load_logged_in_user():
 @app.route('/logout')
 def logout():
     session.clear()
-    return redirect(url_for('web.index'))
-
-
-def login_required(view):
-    @functools.wraps(view)
-    def wrapped_view(**kwargs):
-        if g.user is None:
-            return redirect(url_for('auth.login'))
-
-        return view(**kwargs)
-
-    return wrapped_view
+    set_session_message('Logged out.')
+    return redirect(url_for('auth.login'))
 
 
 @app.route('/delete')
@@ -89,4 +110,6 @@ def login_required(view):
 def delete():
     db.session.delete(g.user)
     db.session.commit()
-    return redirect(url_for('auth.logout'))
+    session.clear()
+    set_session_message('User deleted.')
+    return redirect(url_for('auth.login'))
