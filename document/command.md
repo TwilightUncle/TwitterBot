@@ -20,4 +20,13 @@ $ flask db downgrade
 以下コマンドで実行
 ```
 $ pytest
+
+# 関数詳細つき
+$ pytest -v
+```
+
+## dbについて
+insert, update, deleteするときは必ず最後に以下を記述する事!
+```
+db.session.commit()
 ```
