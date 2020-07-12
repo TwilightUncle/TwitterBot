@@ -23,7 +23,7 @@ def register():
         if not password:
             error.append('Password is required.')
         if db.session.query(User).filter(User.name==username).first() is not None:
-            error.append('User {} is already registered.'.format(username))
+            error.append('User "{}" is already registered.'.format(username))
         # register
         if not error:
             user = User()
@@ -82,3 +82,11 @@ def login_required(view):
         return view(**kwargs)
 
     return wrapped_view
+
+
+@app.route('/delete')
+@login_required
+def delete():
+    db.session.delete(g.user)
+    db.session.commit()
+    return redirect(url_for('auth.logout'))
