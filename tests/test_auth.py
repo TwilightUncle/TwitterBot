@@ -2,6 +2,7 @@ import pytest
 from flask import g, session
 from app.database import db
 from app.models import User
+from tests import check_session_message
 
 
 def test_login(client, auth):
@@ -31,6 +32,8 @@ def test_logout(client, auth):
     with client:
         auth.logout()
         assert 'user_id' not in session
+    
+    check_session_message(client, 'auth/login', b'Logged out.')
 
 
 @pytest.mark.parametrize(
@@ -61,6 +64,8 @@ def test_register(client, app, auth):
 
     with app.app_context():
         assert db.session.query(User).filter(User.name=='testregister').first() is not None
+    
+    check_session_message(client, 'auth/login', b'Registered user.')
 
 
 @pytest.mark.parametrize(
@@ -88,3 +93,17 @@ def test_delete(client, app, auth):
 
     with app.app_context():
         assert db.session.query(User).filter(User.name=='test').first() is None
+    
+    check_session_message(client, 'auth/login', b'User deleted.')
+
+
+@pytest.mark.parametrize(
+    'path',
+    (
+        '/',
+        'auth/register'
+    )
+)
+def test_login_massage(client, auth, path):
+    auth.login()
+    check_session_message(client, path, b'You are now logged.')
