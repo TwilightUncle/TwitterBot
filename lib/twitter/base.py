@@ -5,6 +5,7 @@ import urllib.request
 import hmac
 import hashlib
 import base64
+import json
 
 import random, string
 
@@ -29,13 +30,35 @@ class TwitterApiBaseClient(object, metaclass=abc.ABCMeta):
         self.__ENDPOINT         = self.__class__.__BASE_URL + self._endpoint()
         self.__REQUEST_METHOD   = self._requestMethod().upper()
 
+        self.__request_params   = None
 
-    def __oauth(self):
-        pass
+
+    def exec(self):
+        '''リクエスト実行
+        '''
+        endpoint = self.__ENDPOINT
+        req = None
+        if self.__REQUEST_METHOD == 'GET':
+            query_param_string  = urllib.parse.urlencode(self.__getRequestParams())
+            endpoint           += '?' + query_param_string
+            req                 = urllib.request.Request(endpoint)
+        elif self.__REQUEST_METHOD == 'POST':
+            encoded_params      = json.dumps(self.__getRequestParams()).encode()
+            req                 = urllib.request.Request(endpoint, encoded_params)
+            req.add_header('Content-Type', 'application/json')
+        else:
+            # invaild Http method
+            return None
+        
+        req.add_header('Authorization', self.__buildOAuthHeader())
+        body = None
+        with urllib.request.urlopen(req) as res:
+            body = res.read()
+        
+        return body
 
 
     def __buildOAuthHeader(self) -> str:
-        signature_key = urllib.parse.quote(self.__API_SECRET) + '&' + urllib.parse.quote(self.__ACCESS_SECRET)
         signature_params = {
             'oauth_token'               : self.__ACCESS_TOKEN,
             'oauth_consumer_key'        : self.__API_KEY,
@@ -45,15 +68,16 @@ class TwitterApiBaseClient(object, metaclass=abc.ABCMeta):
             'oauth_version'             : '1.0'
         }
         # join request params
-        signature_params.update(self._buildParams())
+        signature_params.update(self.__getRequestParams())
         # sort and urlencode
         sorted_params           = sorted(signature_params.items(),key=lambda x:x[0])
         encoded_params          = urllib.parse.urlencode(sorted_params)
+        encoded_key             = urllib.parse.quote(self.__API_SECRET) + '&' + urllib.parse.quote(self.__ACCESS_SECRET)
         encoded_url             = urllib.parse.quote(self.__ENDPOINT, safe='')
         # make base string
         signature_base_string   = self.__REQUEST_METHOD + '&' + encoded_url + '&' + encoded_params
         # make signature
-        signature_hash          = hmac.new(signature_key, signature_base_string, hashlib.sha1).digest()
+        signature_hash          = hmac.new(encoded_key, signature_base_string, hashlib.sha1).digest()
         signature               = base64.b64encode(signature_hash)
         signature_params['oauth_signature'] = signature.strip()
         # to string list
@@ -61,7 +85,14 @@ class TwitterApiBaseClient(object, metaclass=abc.ABCMeta):
         for k, v in signature_params.items():
             str_list.append(k + '=' + v)
 
-        return 'Authorization: OAuth ' + ','.join(str_list)
+        return 'OAuth ' + ','.join(str_list)
+    
+
+    def __getRequestParams(self) -> dict:
+        if self.__request_params is None:
+            self.__request_params = self._buildParams()
+        
+        return self.__request_params
 
 
     @abc.abstractmethod
