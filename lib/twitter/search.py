@@ -9,6 +9,8 @@ class TwitterApiSearchClient(TwitterApiBaseClient):
 
     def __init__(self, api_key='', api_secret='', access_token='', access_secret=''):
         super().__init__(api_key, api_secret, access_token, access_secret)
+        super()._addPath('search/tweets')
+        super()._addExtension('json')
 
 
     def setSearchQuery(self, query:str):
@@ -18,10 +20,6 @@ class TwitterApiSearchClient(TwitterApiBaseClient):
     # --------------------------
     # override functions
     # --------------------------
-
-
-    def _endpoint(self) -> str:
-        return 'search/tweets.json'
     
 
     def _requestMethod(self) -> str:
@@ -30,3 +28,7 @@ class TwitterApiSearchClient(TwitterApiBaseClient):
     
     def _getRequiredParameterKeys(self) -> list:
         return ['q']
+    
+
+    def _getFunctionsCallRule(self) -> dict:
+        return {}

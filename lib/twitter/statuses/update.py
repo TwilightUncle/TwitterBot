@@ -10,6 +10,8 @@ class TwitterApiStatusesUpdateClient(TwitterApiBaseClient):
 
     def __init__(self, api_key='', api_secret='', access_token='', access_secret=''):
         super().__init__(api_key, api_secret, access_token, access_secret)
+        super()._addPath('statuses/update')
+        super()._addExtension('json')
 
 
     def setTweet(self, tweet:str):
@@ -37,10 +39,6 @@ class TwitterApiStatusesUpdateClient(TwitterApiBaseClient):
     # --------------------------
     # override functions
     # --------------------------
-
-
-    def _endpoint(self) -> str:
-        return 'statuses/update.json'
     
 
     def _requestMethod(self) -> str:
@@ -49,3 +47,7 @@ class TwitterApiStatusesUpdateClient(TwitterApiBaseClient):
     
     def _getRequiredParameterKeys(self) -> list:
         return ['status']
+    
+
+    def _getFunctionsCallRule(self) -> dict:
+        return {}

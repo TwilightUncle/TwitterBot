@@ -27,7 +27,7 @@ class TwitterApiBaseClient(object, metaclass=abc.ABCMeta):
     '''
 
 
-    __BASE_URL = 'https://api.twitter.com/1.1/'
+    __BASE_URL = 'https://api.twitter.com/1.1'
     __CONFIG_PATH = './instance/twitter_api.cfg' # 必要に応じて書き換える
 
 
@@ -53,11 +53,13 @@ class TwitterApiBaseClient(object, metaclass=abc.ABCMeta):
         self.__API_SECRET       = api_secret
         self.__ACCESS_TOKEN     = access_token
         self.__ACCESS_SECRET    = access_secret
-        self.__ENDPOINT         = self.__class__.__BASE_URL + self._endpoint()
         self.__REQUEST_METHOD   = self._requestMethod().upper()
 
         self.__request_params   = None
         self.__request_params_raw = {}
+
+        self.__endpoint         = self.__class__.__BASE_URL
+        self.__require_call_functions = self._getFunctionsCallRule()
 
         # response
         self.__status           = None
@@ -72,11 +74,14 @@ class TwitterApiBaseClient(object, metaclass=abc.ABCMeta):
     def exec(self) -> str:
         '''リクエスト実行
         '''
-        query_param_string  = urllib.parse.urlencode(self.__getRequestParams())
-        endpoint            = self.__ENDPOINT + '?' + query_param_string
+        query_param_string  = ''
+        if len(self.__getRequestParams()) > 0:
+            query_param_string  = '?' + urllib.parse.urlencode(self.__getRequestParams())
+        
+        endpoint            = self.__endpoint + query_param_string
         req                 = urllib.request.Request(endpoint, method=self.__REQUEST_METHOD)
         req.add_header('Authorization', self.__buildOAuthHeader())
-        
+
         with urllib.request.urlopen(req) as res:
             self.__status   = res.status
             self.__headers  = res.getheaders()
@@ -113,7 +118,7 @@ class TwitterApiBaseClient(object, metaclass=abc.ABCMeta):
         encoded_params          = urllib.parse.urlencode(sorted_params)
         encoded_params          = urllib.parse.quote(encoded_params) # 更にエンコードが必要
         encoded_key             = urllib.parse.quote(self.__API_SECRET) + '&' + urllib.parse.quote(self.__ACCESS_SECRET)
-        encoded_url             = urllib.parse.quote(self.__ENDPOINT, safe='')
+        encoded_url             = urllib.parse.quote(self.__endpoint, safe='')
         # make base string
         signature_base_string   = self.__REQUEST_METHOD + '&' + encoded_url + '&' + encoded_params
         # make signature
@@ -147,11 +152,18 @@ class TwitterApiBaseClient(object, metaclass=abc.ABCMeta):
             self.__request_params = self.__request_params_raw
         
         return self.__request_params
+    
 
+    def _addPath(self, path:str):
+        '''前後のスラッシュは削除, 後ろに再度追加
+        '''
+        self.__endpoint += '/' + path.strip('/')
+    
 
-    @abc.abstractmethod
-    def _endpoint(self) -> str:
-        raise NotImplementedError()
+    def _addExtension(self, ext:str):
+        '''エンドポイントの拡張子を指定
+        '''
+        self.__endpoint += '.' + ext
 
 
     @abc.abstractmethod
@@ -162,4 +174,10 @@ class TwitterApiBaseClient(object, metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def _getRequiredParameterKeys(self) -> list:
         '''必須パラメータのキー一覧'''
+        raise NotImplementedError()
+
+
+    @abc.abstractmethod
+    def _getFunctionsCallRule(self) -> dict:
+        '''関数呼び出しのルール定義'''
         raise NotImplementedError()
