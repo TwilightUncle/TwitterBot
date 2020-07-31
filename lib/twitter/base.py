@@ -72,22 +72,11 @@ class TwitterApiBaseClient(object, metaclass=abc.ABCMeta):
     def exec(self) -> str:
         '''リクエスト実行
         '''
-        endpoint = self.__ENDPOINT
-        req = None
-        if self.__REQUEST_METHOD == 'GET':
-            query_param_string  = urllib.parse.urlencode(self.__getRequestParams())
-            endpoint           += '?' + query_param_string
-            req                 = urllib.request.Request(endpoint)
-        elif self.__REQUEST_METHOD == 'POST':
-            encoded_params      = json.dumps(self.__getRequestParams()).encode()
-            req                 = urllib.request.Request(endpoint, encoded_params)
-            req.add_header('Content-Type', 'application/json')
-        else:
-            # invaild Http method
-            return None
-        
+        query_param_string  = urllib.parse.urlencode(self.__getRequestParams())
+        endpoint            = self.__ENDPOINT + '?' + query_param_string
+        req                 = urllib.request.Request(endpoint, method=self.__REQUEST_METHOD)
         req.add_header('Authorization', self.__buildOAuthHeader())
-        response = None
+        
         with urllib.request.urlopen(req) as res:
             self.__status   = res.status
             self.__headers  = res.getheaders()
