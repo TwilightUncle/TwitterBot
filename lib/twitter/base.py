@@ -266,7 +266,7 @@ class TwitterApiBaseClient(object, metaclass=abc.ABCMeta):
             if self.__is_executed == True:
                 raise TwitterAPIClientError('"{}" cannot be called after executing exec.'.format(method_name))
             max_count = count_rule.get('max')
-            if max_count and max_count < self.__method_call_counter[method_name]
+            if max_count and max_count < self.__method_call_counter[method_name]:
                 raise TwitterAPIClientError('"{}" can be called up to {} times.'.format(method_name, max_count))
         
         # required check
