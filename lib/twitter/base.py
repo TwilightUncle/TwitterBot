@@ -188,7 +188,7 @@ class TwitterApiBaseClient(object, metaclass=abc.ABCMeta):
             },
             'exec' : {
                 'callable' : 'before_exec'
-            }
+            },
             'getStatus' : {
                 'callable' : 'after_exec'
             },
