@@ -213,7 +213,7 @@ class TwitterApiBaseClient(object, metaclass=abc.ABCMeta):
                 raise TwitterAPIClientError('"{}" must be called before "exec" call'.format(k))
 
             # validation number of calls
-            count_rule  = b.get('call_count')
+            count_rule  = v.get('call_count')
             if count_rule:
                 min_count = count_rule.get('min')
                 if min_count and (call_count is None or call_count < min_count):
