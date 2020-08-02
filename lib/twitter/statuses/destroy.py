@@ -1,5 +1,7 @@
+import re
 from lib.twitter.base import TwitterApiBaseClient
-from lib.twitter.exception import TwitterValidateParamaterError
+from lib.twitter.exception import TwitterValidateParamaterError, TwitterAPIClientError
+
 
 
 class TwitterApiStatusesDestoryClient(TwitterApiBaseClient):
@@ -13,7 +15,13 @@ class TwitterApiStatusesDestoryClient(TwitterApiBaseClient):
 
 
     def setDestroyId(self, id:str):
-        # id の数値型チェックで失敗させる
+        '''削除する対象のツイートidを指定
+        \n エンドポイントの確定もあるので一度だけの呼び出しとする
+        '''
+        p = re.compile('\d+')
+        if p.fullmatch(id) is None:
+            raise TwitterAPIClientError('Only numbers can be specified in the argument.')
+
         super()._addPath('statuses/destroy')
         super()._addPath(id)
         super()._addExtension('json')
