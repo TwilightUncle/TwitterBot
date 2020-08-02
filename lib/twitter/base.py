@@ -283,16 +283,16 @@ class TwitterApiBaseClient(object, metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def _requestMethod(self) -> str:
-        raise NotImplementedError()
+        raise NotImplementedError(sys._getframe().f_code.co_name)
 
 
     @abc.abstractmethod
     def _getRequiredParameterKeys(self) -> list:
         '''必須パラメータのキー一覧'''
-        raise NotImplementedError()
+        raise NotImplementedError(sys._getframe().f_code.co_name)
 
 
     @abc.abstractmethod
     def _getFunctionsCallRule(self) -> dict:
         '''関数呼び出しのルール定義'''
-        raise NotImplementedError()
+        raise NotImplementedError(sys._getframe().f_code.co_name)
