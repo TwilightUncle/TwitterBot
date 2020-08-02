@@ -14,6 +14,7 @@ class TwitterApiSearchClient(TwitterApiBaseClient):
 
 
     def setSearchQuery(self, query:str):
+        super()._validateMethodCallCorrectness(sys._getframe().f_code.co_name)
         super().setParam('q', query)
     
 
@@ -31,4 +32,8 @@ class TwitterApiSearchClient(TwitterApiBaseClient):
     
 
     def _getFunctionsCallRule(self) -> dict:
-        return {}
+        return {
+            'setSearchQuery' : {
+                'required' : True
+            }
+        }

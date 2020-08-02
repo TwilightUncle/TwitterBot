@@ -17,6 +17,8 @@ class TwitterApiStatusesUpdateClient(TwitterApiBaseClient):
     def setTweet(self, tweet:str):
         '''投稿するツイート文
         '''
+        super()._validateMethodCallCorrectness(sys._getframe().f_code.co_name)
+
         MAX_LENGTH = 140
         if len(tweet) > MAX_LENGTH:
             raise TwitterValidateParamaterError('Too many characters. Excess:{}'.format(len(tweet) - MAX_LENGTH))
@@ -27,12 +29,14 @@ class TwitterApiStatusesUpdateClient(TwitterApiBaseClient):
     def setReplyTargetId(self, id:str):
         '''リプする場合の対象tweet idをセット
         '''
+        super()._validateMethodCallCorrectness(sys._getframe().f_code.co_name)
         super().setParam('in_reply_to_status_id', id)
     
 
     def setSensitive(self, is_sensitive:bool):
         '''センシティブなツイートをするときtrue
         '''
+        super()._validateMethodCallCorrectness(sys._getframe().f_code.co_name)
         super().setParam('possibly_sensitive', 'true' if is_sensitive else 'false')
     
 
@@ -50,4 +54,14 @@ class TwitterApiStatusesUpdateClient(TwitterApiBaseClient):
     
 
     def _getFunctionsCallRule(self) -> dict:
-        return {}
+        return {
+            'setTweet' : {
+                'required' : True
+            },
+            'setReplyTargetId' : {
+                'callable' : 'before_exec'
+            },
+            'setSensitive' : {
+                'callable' : 'before_exec'
+            }
+        }
