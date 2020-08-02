@@ -1,4 +1,5 @@
 import re
+import sys
 from lib.twitter.base import TwitterApiBaseClient
 from lib.twitter.exception import TwitterValidateParamaterError, TwitterAPIClientError
 
@@ -18,6 +19,8 @@ class TwitterApiStatusesDestoryClient(TwitterApiBaseClient):
         '''削除する対象のツイートidを指定
         \n エンドポイントの確定もあるので一度だけの呼び出しとする
         '''
+        super()._validateMethodCallCorrectness(sys._getframe().f_code.co_name)
+
         p = re.compile('\d+')
         if p.fullmatch(id) is None:
             raise TwitterAPIClientError('Only numbers can be specified in the argument.')
@@ -28,6 +31,8 @@ class TwitterApiStatusesDestoryClient(TwitterApiBaseClient):
     
 
     def setIsTrimUser(self, is_trim:bool):
+        super()._validateMethodCallCorrectness(sys._getframe().f_code.co_name)
+        
         if is_trim:
             super().setParam('trim_user', 'true')
     
@@ -47,5 +52,13 @@ class TwitterApiStatusesDestoryClient(TwitterApiBaseClient):
 
     def _getFunctionsCallRule(self) -> dict:
         return {
-            'setDestroyId' : ['required', 'once']
+            'setDestroyId' : {
+                'required' : True,
+                'call_count' : {
+                    'max' : 1
+                }
+            },
+            'setIsTrimUser' : {
+                'callable' : 'before_exec'
+            }
         }
