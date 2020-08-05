@@ -59,6 +59,9 @@ class TwitterApiBaseClient(object, metaclass=abc.ABCMeta):
         self.__request_params   = None
         self.__request_params_raw = {}
 
+        self.__media_params     = None
+        self.__is_media_upload  = False
+
         self.__endpoint         = self.__class__.__BASE_URL
 
         self.__method_call_counter  = {}
@@ -77,9 +80,17 @@ class TwitterApiBaseClient(object, metaclass=abc.ABCMeta):
     # -----------------------------------------------------------------------
 
 
-    def setParam(self, key:str, value:str):
+    def setParam(self, key:str, value):
         self._validateMethodCallCorrectness(sys._getframe().f_code.co_name)
         self.__request_params_raw[key] = value
+    
+
+    def setEncodeMediaFilePath(self, key:str, path:str):
+        self.setParam(key, {'is_encode' : True, 'file_path' : path})
+    
+
+    def setMediaFilePath(self, key:str, path:str):
+        self.setParam(key, {'is_encode' : False, 'file_path' : path})
 
 
     def exec(self) -> str:
@@ -93,7 +104,15 @@ class TwitterApiBaseClient(object, metaclass=abc.ABCMeta):
             query_param_string  = '?' + urllib.parse.urlencode(self.__getRequestParams())
         
         endpoint            = self.__endpoint + query_param_string
-        req                 = urllib.request.Request(endpoint, method=self.__REQUEST_METHOD)
+
+        req = None
+        if self.__is_media_upload:
+            boundary, data  = self.__buildMediaData()
+            req             = urllib.request.Request(endpoint, method=self.__REQUEST_METHOD, data=data)
+            req.add_header('Content-Type', 'multipart/form-data; boundary=' + boundary)
+        else:
+            req             = urllib.request.Request(endpoint, method=self.__REQUEST_METHOD)
+            
         req.add_header('Authorization', self.__buildOAuthHeader())
 
         with urllib.request.urlopen(req) as res:
@@ -166,6 +185,51 @@ class TwitterApiBaseClient(object, metaclass=abc.ABCMeta):
         return 'OAuth ' + ', '.join(str_list)
     
 
+    def __buildMediaData(self) -> tuple:
+        '''画像送信等に対応
+        \n Content-Type: multipart/form-data;のリクエストを作成
+        '''
+        params = []
+        # boundary
+        boundary = 'k-u-r-u-m-i-------------' + generateRandomString(32)
+        delimiter = '--' + boundary
+
+        for param_name, value in self.__getMediaParams():
+            # get value
+            data = None
+            if type(value) is str:
+                data = value
+            
+            if type(value) is dict:
+                file_path = value.get('file_path')
+                data = None
+                if file_path:
+                    with open(file_path) as media_file:
+                        data = media_file.read()
+                    
+                    if value.get('is_encode') == True:
+                        data = base64.b64encode(data)
+                    
+                    data = data.decode('utf-8')
+            
+            if data is None:
+                raise TwitterAPIClientError('incorrect input parameter type.')
+
+            # build data
+            param = []
+            param.append(delimiter)
+            param.append('Content-Disposition: form-data; name="{}"; '.format(param_name))
+            param.append('')
+            param.append(data)
+
+            # append params
+            params.append("\r\n".join(param))
+        
+        params.append(delimiter + "--\r\n\r\n")
+
+        return boundary, "\r\n".join(params)
+    
+
     def __getRequestParams(self) -> dict:
         if self.__request_params is None:
             # check required params
@@ -176,15 +240,33 @@ class TwitterApiBaseClient(object, metaclass=abc.ABCMeta):
                     # 例外を置き換える
                     raise TwitterRequiredParameterError("Required request parameter '{}' is not set".format(key))
             
-            self.__request_params = self.__request_params_raw
+            if self.__is_media_upload:
+                self.__request_params   = {}
+                self.__media_params     = self.__request_params_raw
+            else:
+                self.__request_params   = self.__request_params_raw
+                self.__media_params     = {}
         
         return self.__request_params
+    
+
+    def __getMediaParams(self) -> dict:
+        if self.__media_params is None:
+            self.__getRequestParams()
+        
+        return self.__media_params
     
 
     def __getMethodCallRules(self) -> dict:
         return {
             'setParam' : {
                 'callable' : 'before_exec'
+            },
+            'setEncodeMediaFilePath' : {
+                'media_upload_mode' : True
+            },
+            'setMediaFilePath' : {
+                'media_upload_mode' : True
             },
             'exec' : {
                 'callable' : 'before_exec'
@@ -238,6 +320,12 @@ class TwitterApiBaseClient(object, metaclass=abc.ABCMeta):
         self.__endpoint += '.' + ext
     
 
+    def _setMediaUploadMode(self):
+        '''メディアアップロード系のエンドポイントではこれをコンストラクタで呼び出す
+        '''
+        self.__is_media_upload = True
+    
+
     def _validateMethodCallCorrectness(self, method_name:str):
         '''呼び出しに条件があるメソッドはこれを呼びだす(検証対象の関数呼び出し時点で分かるものは呼び出しの段階で例外)
         '''
@@ -274,6 +362,15 @@ class TwitterApiBaseClient(object, metaclass=abc.ABCMeta):
         if required == True:
             if self.__is_executed == True:
                 raise TwitterAPIClientError('"{}" cannot be called after executing exec.'.format(method_name))
+        
+        # is media upload mode
+        media_upload_mode = rule.get('media_upload_mode')
+        if media_upload_mode == True:
+            if self.__is_media_upload == False:
+                raise TwitterAPIClientError('Cannot call "{}" because it is not in "media upload mode"'.format(method_name))
+        else:
+            if self.__is_media_upload == True:
+                raise TwitterAPIClientError('Cannot call "{}" because it is in "media upload mode"'.format(method_name))
 
     
     # -------------------------------------------------------------------------
