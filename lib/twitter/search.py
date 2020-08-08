@@ -1,5 +1,5 @@
 import sys
-from lib.twitter.base import TwitterApiBaseClient, TwitterApiBaseInput
+from lib.twitter.base import TwitterApiBaseClient, TwitterApiBaseInput, TwitterApiBaseOutput
 from lib.twitter.exception import TwitterAPIInputError
 
 
@@ -22,6 +22,14 @@ class TwitterApiSearchInput(TwitterApiBaseInput):
         super()._setQueryParam('q', self.__search_query)
 
 
+class TwitterApiSearchOutput(TwitterApiBaseOutput):
+    '''tweet検索api出力'''
+
+
+    def __init__(self, results):
+        super().__init__(results)
+
+
 class TwitterApiSearchClient(TwitterApiBaseClient):
     '''tweet検索apiクライアント
     \n http://westplain.sakuraweb.com/translate/twitter/Documentation/REST-APIs/Public-API/GET-search-tweets.cgi
@@ -37,6 +45,11 @@ class TwitterApiSearchClient(TwitterApiBaseClient):
     # --------------------------
     # override functions
     # --------------------------
+    
+
+    def exec(self, inp) -> TwitterApiSearchOutput:
+        results = super().exec(inp)
+        return TwitterApiSearchOutput(results)
     
 
     def _requestMethod(self) -> str:

@@ -19,6 +19,9 @@ def generateRandomString(n:int) -> str:
     return ''.join(random.choices(string.ascii_letters + string.digits, k=n))
 
 
+# ==========================================================================
+# クライアントクラス
+# ==========================================================================
 class TwitterApiBaseClient(object, metaclass=abc.ABCMeta):
     '''Twitter APIクライアントの基底クラス
     \n# 署名作成参考記事
@@ -61,11 +64,6 @@ class TwitterApiBaseClient(object, metaclass=abc.ABCMeta):
         self.__is_media_upload  = False
 
         self.__endpoint         = self.__class__.__BASE_URL
-
-        # response
-        self.__status           = None
-        self.__headers          = None
-        self.__contents         = None
     
 
     # -----------------------------------------------------------------------
@@ -73,7 +71,7 @@ class TwitterApiBaseClient(object, metaclass=abc.ABCMeta):
     # -----------------------------------------------------------------------
 
 
-    def exec(self, inp):
+    def exec(self, inp) -> dict:
         '''リクエスト実行(他に必要な処理あればオーバーライド想定)
         '''
         # get params
@@ -99,26 +97,14 @@ class TwitterApiBaseClient(object, metaclass=abc.ABCMeta):
         req.add_header('Authorization', self.__buildOAuthHeader())
 
         # request execute
+        results = {}
         with urllib.request.urlopen(req) as res:
-            self.__status   = res.status
-            self.__headers  = res.getheaders()
-            response        = res.read().decode('utf-8')
-            self.__contents = json.loads(response)
+            results['status']   = res.status
+            results['headers']  = res.getheaders()
+            response            = res.read().decode('utf-8')
+            results['contents'] = json.loads(response)
         
-
-    def getStatus(self):
-        '''exec実行後呼び出し(結果)'''
-        return self.__status
-    
-
-    def getHeaders(self):
-        '''exec実行後呼び出し(結果)'''
-        return self.__headers
-    
-
-    def getContents(self):
-        '''exec実行後呼び出し(結果)'''
-        return self.__contents
+        return results
     
 
     # -------------------------------------------------------------------------
@@ -250,6 +236,9 @@ class TwitterApiBaseClient(object, metaclass=abc.ABCMeta):
         raise NotImplementedError(sys._getframe().f_code.co_name)
 
 
+# ==========================================================================
+# 入力クラス
+# ==========================================================================
 class TwitterApiBaseInput(object, metaclass=abc.ABCMeta):
     '''入力値設定基底クラス
     \n 基底クラスの関数は基本的に外で呼び出されることを想定されていません。
@@ -289,3 +278,32 @@ class TwitterApiBaseInput(object, metaclass=abc.ABCMeta):
     def _checkInputCorrectness(self):
         '''入力値の正当性チェック。駄目だったら例外を投げる'''
         raise NotImplementedError(sys._getframe().f_code.co_name)
+
+
+# ==========================================================================
+# 出力クラス
+# ==========================================================================
+class TwitterApiBaseOutput(object, metaclass=abc.ABCMeta):
+    '''出力基底クラス
+    '''
+
+
+    def __init__(self, results):
+        self.__status   = results.get('status')
+        self.__headers  = results.get('headers')
+        self.__contents = results.get('contents')
+    
+
+    def getStatus(self):
+        '''http status code'''
+        return self.__status
+    
+
+    def getHeaders(self):
+        '''http headers'''
+        return self.__headers
+    
+
+    def getContents(self):
+        '''contents'''
+        return self.__contents
