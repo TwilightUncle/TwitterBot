@@ -8,12 +8,12 @@ class TwitterApiSearchInput(TwitterApiBaseInput):
 
 
     def __init__(self):
+        super().__init__()
         self.__search_query = None
     
 
     def setSearchQuery(self, query:str):
         self.__search_query = query
-        super()._setQueryParam('q', query)
     
 
     def _checkInputCorrectness(self):
@@ -41,7 +41,3 @@ class TwitterApiSearchClient(TwitterApiBaseClient):
 
     def _requestMethod(self) -> str:
         return 'GET'
-
-    
-    def _getRequiredParameterKeys(self) -> list:
-        return ['q']

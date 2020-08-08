@@ -74,9 +74,10 @@ class TwitterApiBaseClient(object, metaclass=abc.ABCMeta):
 
 
     def exec(self, inp):
-        '''リクエスト実行(オーバーライド想定)
+        '''リクエスト実行(他に必要な処理あればオーバーライド想定)
         '''
         # get params
+        inp._checkInputCorrectness()
         self.__request_params   = inp._getQueryParams()
         self.__media_params     = inp._getPostParams()
 
@@ -249,14 +250,9 @@ class TwitterApiBaseClient(object, metaclass=abc.ABCMeta):
         raise NotImplementedError(sys._getframe().f_code.co_name)
 
 
-    @abc.abstractmethod
-    def _getRequiredParameterKeys(self) -> list:
-        '''必須パラメータのキー一覧'''
-        raise NotImplementedError(sys._getframe().f_code.co_name)
-
-
 class TwitterApiBaseInput(object, metaclass=abc.ABCMeta):
     '''入力値設定基底クラス
+    \n 基底クラスの関数は基本的に外で呼び出されることを想定されていません。
     '''
 
 
