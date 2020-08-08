@@ -17,9 +17,10 @@ class ResponseObjectTweets(object):
         self.__reply_tweet_id   = None              # リプ元のツイートID
         self.__reply_user_id    = None              # リプ元ツイートのユーザーID
         self.__lang             = None              # ツイートの言語
-        self.__quoted_status_id = None              # リツイート元ツイートID
+        self.__quoted_status_id = None              # 引用元ツイートID
         self.__quoted_status    = None              # 引用元ツイート情報
         self.__retweet_count    = None              # リツイートされた回数
+        self.__retweeted_status = None              # リツイート元ツイート
         self.__text             = None              # ツイートの本文
         self.__user             = None              # 投稿ユーザー情報。ResponseObjectUserを参照
 
@@ -31,8 +32,16 @@ class ResponseObjectTweets(object):
         self.__reply_user_id    = data.get('in_reply_to_user_id_str')
         self.__lang             = data.get('lang')
         self.__quoted_status_id = data.get('quoted_status_id_str')
+        self.__quoted_status    = self.__makeTweetObject(data.get('quoted_status'))
         self.__retweet_count    = data.get('retweet_count')
+        self.__retweeted_status = self.__makeTweetObject(data.get('retweeted_status'))
         self.__text             = data.get('text')
+    
+
+    def __makeTweetObject(data):
+        if data is None:
+            return None
+        return ResponseObjectTweets(data)
     
 
     # ---------------------------------------------------------------------------
@@ -90,6 +99,10 @@ class ResponseObjectTweets(object):
 
     def getRetweetCount(self):
         return self.__retweet_count
+    
+
+    def getRetweetedTweet(self):
+        return self.__retweeted_status
     
 
     def getText(self):
