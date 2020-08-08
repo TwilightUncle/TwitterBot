@@ -13,6 +13,9 @@ class TwitterApiSearchInput(TwitterApiBaseInput):
     
 
     def setSearchQuery(self, query:str):
+        MAX_LEN = 500
+        if len(tweet) > MAX_LENGTH:
+            raise TwitterAPIInputError('Too many characters. Excess:{}'.format(len(tweet) - MAX_LENGTH))
         self.__search_query = query
     
 
