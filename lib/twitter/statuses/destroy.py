@@ -1,8 +1,46 @@
 import re
 import sys
-from lib.twitter.base import TwitterApiBaseClient
-from lib.twitter.exception import TwitterValidateParamaterError, TwitterAPIClientError
+from lib.twitter.base import TwitterApiBaseClient, TwitterApiBaseInput, TwitterApiBaseOutput
+from lib.twitter.exception import TwitterAPIClientError, TwitterAPIInputError
 
+
+class TwitterApiStatusesDestoryInput(TwitterApiBaseInput):
+    def __init__(self):
+        super().__init__()
+        self.__destroy_id = ''
+        self.__is_trim_user = None
+    
+
+    def setDestroyId(self, id:str):
+        '''削除する対象のツイートidを指定
+        \n エンドポイントの確定もあるので一度だけの呼び出しとする
+        '''
+        p = re.compile('\d+')
+        if p.fullmatch(id) is None:
+            raise TwitterAPIClientError('Only numbers can be specified in the argument.')
+        self.__destroy_id = id
+    
+
+    def setIsTrimUser(self, is_trim:bool):
+        if is_trim:
+            self.__is_trim_user = 'true'
+    
+
+    def getDestroyId(self):
+        return self.__destroy_id
+    
+
+    def _checkInputCorrectness(self):
+        if self.__destroy_id == '':
+            raise TwitterAPIInputError('rquired parameter is not input.')
+
+        if self.__is_trim_user is not None:
+            super()._setQueryParam('trim_user', self.__is_trim_user)
+
+
+class TwitterApiStatusesDestoryOutput(TwitterApiBaseOutput):
+    def __init__(self, results):
+        super().__init__(results)
 
 
 class TwitterApiStatusesDestoryClient(TwitterApiBaseClient):
@@ -13,52 +51,22 @@ class TwitterApiStatusesDestoryClient(TwitterApiBaseClient):
 
     def __init__(self, api_key='', api_secret='', access_token='', access_secret=''):
         super().__init__(api_key, api_secret, access_token, access_secret)
-
-
-    def setDestroyId(self, id:str):
-        '''削除する対象のツイートidを指定
-        \n エンドポイントの確定もあるので一度だけの呼び出しとする
-        '''
-        super()._validateMethodCallCorrectness(sys._getframe().f_code.co_name)
-
-        p = re.compile('\d+')
-        if p.fullmatch(id) is None:
-            raise TwitterAPIClientError('Only numbers can be specified in the argument.')
-
-        super()._addPath('statuses/destroy')
-        super()._addPath(id)
-        super()._addExtension('json')
-    
-
-    def setIsTrimUser(self, is_trim:bool):
-        super()._validateMethodCallCorrectness(sys._getframe().f_code.co_name)
-        
-        if is_trim:
-            super().setParam('trim_user', 'true')
     
 
     # --------------------------
     # override functions
     # --------------------------
+
+
+    def exec(self, inp) -> TwitterApiStatusesDestoryOutput:
+        # make endpoint
+        super()._addPath('statuses/destroy')
+        super()._addPath(inp.getDestroyId())
+        super()._addExtension('json')
+        # execute
+        results = super().exec(inp)
+        return TwitterApiStatusesDestoryOutput(results)
     
 
     def _requestMethod(self) -> str:
         return 'POST'
-
-    
-    def _getRequiredParameterKeys(self) -> list:
-        return []
-    
-
-    def _getFunctionsCallRule(self) -> dict:
-        return {
-            'setDestroyId' : {
-                'required' : True,
-                'call_count' : {
-                    'max' : 1
-                }
-            },
-            'setIsTrimUser' : {
-                'callable' : 'before_exec'
-            }
-        }
