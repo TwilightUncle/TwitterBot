@@ -62,8 +62,6 @@ class TwitterApiStatusesUpdateClient(TwitterApiBaseClient):
 
     def __init__(self, api_key='', api_secret='', access_token='', access_secret=''):
         super().__init__(api_key, api_secret, access_token, access_secret)
-        super()._addPath('statuses/update')
-        super()._addExtension('json')
     
 
     # --------------------------
@@ -72,6 +70,8 @@ class TwitterApiStatusesUpdateClient(TwitterApiBaseClient):
 
 
     def exec(self, inp) -> TwitterApiStatusesUpdateOutput:
+        super()._addPath('statuses/update')
+        super()._addExtension('json')
         results = super().exec(inp)
         return TwitterApiStatusesUpdateOutput(results)
     

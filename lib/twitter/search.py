@@ -38,8 +38,6 @@ class TwitterApiSearchClient(TwitterApiBaseClient):
 
     def __init__(self, api_key='', api_secret='', access_token='', access_secret=''):
         super().__init__(api_key, api_secret, access_token, access_secret)
-        super()._addPath('search/tweets')
-        super()._addExtension('json')
     
 
     # --------------------------
@@ -48,6 +46,8 @@ class TwitterApiSearchClient(TwitterApiBaseClient):
     
 
     def exec(self, inp) -> TwitterApiSearchOutput:
+        super()._addPath('search/tweets')
+        super()._addExtension('json')
         results = super().exec(inp)
         return TwitterApiSearchOutput(results)
     

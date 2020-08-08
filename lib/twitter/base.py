@@ -61,9 +61,10 @@ class TwitterApiBaseClient(object, metaclass=abc.ABCMeta):
 
         self.__request_params   = None
         self.__media_params     = None
+        self.__endpoint         = None
         self.__is_media_upload  = False
 
-        self.__endpoint         = self.__class__.__BASE_URL
+        self.__initializeParams()
     
 
     # -----------------------------------------------------------------------
@@ -83,7 +84,6 @@ class TwitterApiBaseClient(object, metaclass=abc.ABCMeta):
         query_param_string  = ''
         if len(self.__getRequestParams()) > 0:
             query_param_string  = '?' + urllib.parse.urlencode(self.__getRequestParams())
-        
         endpoint            = self.__endpoint + query_param_string
 
         req = None
@@ -93,7 +93,6 @@ class TwitterApiBaseClient(object, metaclass=abc.ABCMeta):
             req.add_header('Content-Type', 'multipart/form-data; boundary=' + boundary)
         else:
             req             = urllib.request.Request(endpoint, method=self.__REQUEST_METHOD)
-            
         req.add_header('Authorization', self.__buildOAuthHeader())
 
         # request execute
@@ -104,6 +103,8 @@ class TwitterApiBaseClient(object, metaclass=abc.ABCMeta):
             response            = res.read().decode('utf-8')
             results['contents'] = json.loads(response)
         
+        # パラメータ等を初期化して、インスタンスを再利用できるようにする
+        self.__initializeParams()
         return results
     
 
@@ -201,6 +202,12 @@ class TwitterApiBaseClient(object, metaclass=abc.ABCMeta):
 
     def __getMediaParams(self) -> dict:
         return self.__media_params
+    
+
+    def __initializeParams(self):
+        self.__request_params   = None
+        self.__media_params     = None
+        self.__endpoint         = self.__class__.__BASE_URL
     
 
     # -------------------------------------------------------------------------
