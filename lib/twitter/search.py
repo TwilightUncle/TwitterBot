@@ -10,6 +10,7 @@ class TwitterApiSearchInput(TwitterApiBaseInput):
     def __init__(self):
         super().__init__()
         self.__search_query = None
+        self.__count        = None
     
 
     def setSearchQuery(self, query:str):
@@ -19,10 +20,23 @@ class TwitterApiSearchInput(TwitterApiBaseInput):
         self.__search_query = query
     
 
+    def setCount(self, num:int):
+        MAX_COUNT = 100
+        MIN_COUNT = 1
+        if num > MAX_COUNT:
+            TwitterAPIInputError('Input value is too large. max: {}'.format(MAX_COUNT))
+        if num < MIN_COUNT:
+            TwitterAPIInputError('Input value is too small. max: {}'.format(MIN_COUNT))
+        self.__count = str(num)
+    
+
     def _checkInputCorrectness(self):
         if self.__search_query is None:
             raise TwitterAPIInputError('rquired parameter is not input.')
         super()._setQueryParam('q', self.__search_query)
+
+        if self.__count is not None:
+            super()._setQueryParam('count', self.__count)
 
 
 class TwitterApiSearchOutput(TwitterApiBaseOutput):
