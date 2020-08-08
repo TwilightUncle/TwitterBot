@@ -14,3 +14,9 @@ class TwitterAPIClientError(Exception):
     '''ツイッタークライアント関係のエラーは取りあえずこれ投げとく
     '''
     pass
+
+
+class TwitterAPIInputError(Exception):
+    '''入力値エラー
+    '''
+    pass
