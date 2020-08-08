@@ -64,11 +64,6 @@ class TwitterApiBaseClient(object, metaclass=abc.ABCMeta):
 
         self.__endpoint         = self.__class__.__BASE_URL
 
-        self.__method_call_counter  = {}
-        self.__method_call_rules    = self.__getMethodCallRules()
-        self.__method_call_rules.update(self._getFunctionsCallRule())
-        self.__is_executed          = False
-
         # response
         self.__status           = None
         self.__headers          = None
@@ -81,7 +76,6 @@ class TwitterApiBaseClient(object, metaclass=abc.ABCMeta):
 
 
     def setParam(self, key:str, value):
-        self._validateMethodCallCorrectness(sys._getframe().f_code.co_name)
         self.__request_params_raw[key] = value
     
 
@@ -93,12 +87,9 @@ class TwitterApiBaseClient(object, metaclass=abc.ABCMeta):
         self.setParam(key, {'is_encode' : False, 'file_path' : path})
 
 
-    def exec(self) -> str:
+    def exec(self):
         '''リクエスト実行
         '''
-        self._validateMethodCallCorrectness(sys._getframe().f_code.co_name)
-        self.__validateMethodCallCorrectness()
-
         query_param_string  = ''
         if len(self.__getRequestParams()) > 0:
             query_param_string  = '?' + urllib.parse.urlencode(self.__getRequestParams())
@@ -121,24 +112,19 @@ class TwitterApiBaseClient(object, metaclass=abc.ABCMeta):
             response        = res.read().decode('utf-8')
             self.__contents = json.loads(response)
         
-        self.__is_executed = True
-        
 
     def getStatus(self):
         '''exec実行後呼び出し(結果)'''
-        self._validateMethodCallCorrectness(sys._getframe().f_code.co_name)
         return self.__status
     
 
     def getHeaders(self):
         '''exec実行後呼び出し(結果)'''
-        self._validateMethodCallCorrectness(sys._getframe().f_code.co_name)
         return self.__headers
     
 
     def getContents(self):
         '''exec実行後呼び出し(結果)'''
-        self._validateMethodCallCorrectness(sys._getframe().f_code.co_name)
         return self.__contents
     
 
@@ -257,52 +243,6 @@ class TwitterApiBaseClient(object, metaclass=abc.ABCMeta):
         return self.__media_params
     
 
-    def __getMethodCallRules(self) -> dict:
-        return {
-            'setParam' : {
-                'callable' : 'before_exec'
-            },
-            'setEncodeMediaFilePath' : {
-                'media_upload_mode' : True
-            },
-            'setMediaFilePath' : {
-                'media_upload_mode' : True
-            },
-            'exec' : {
-                'callable' : 'before_exec'
-            },
-            'getStatus' : {
-                'callable' : 'after_exec'
-            },
-            'getHeaders' : {
-                'callable' : 'after_exec'
-            },
-            'getContents' : {
-                'callable' : 'after_exec'
-            }
-        }
-
-    
-    def __validateMethodCallCorrectness(self):
-        '''execの最初に呼び出すことのみを想定。関数呼び出しの正当性の検証
-        '''
-        for k, v in self.__method_call_rules.items():
-            call_count  = self.__method_call_counter.get(k)
-
-            # required check
-            required    = v.get('required')
-            if required == True and (call_count is None or call_count <  1):
-                raise TwitterAPIClientError('"{}" must be called before "exec" call'.format(k))
-
-            # validation number of calls
-            count_rule  = v.get('call_count')
-            if count_rule:
-                min_count = count_rule.get('min')
-                if min_count and (call_count is None or call_count < min_count):
-                    raise TwitterAPIClientError('"{}" must be called at least {} times'.format(k, min_count))
-
-    
-
     # -------------------------------------------------------------------------
     # protedted methods
     # -------------------------------------------------------------------------
@@ -324,53 +264,6 @@ class TwitterApiBaseClient(object, metaclass=abc.ABCMeta):
         '''メディアアップロード系のエンドポイントではこれをコンストラクタで呼び出す
         '''
         self.__is_media_upload = True
-    
-
-    def _validateMethodCallCorrectness(self, method_name:str):
-        '''呼び出しに条件があるメソッドはこれを呼びだす(検証対象の関数呼び出し時点で分かるものは呼び出しの段階で例外)
-        '''
-        # count number of call
-        if self.__method_call_counter.get(method_name) is None:
-            self.__method_call_counter[method_name] = 0
-        
-        self.__method_call_counter[method_name] += 1
-
-       # get rule 
-        rule = self.__method_call_rules.get(method_name)
-        if rule is None:
-            return
-        
-        # validation callable
-        callable_rule = rule.get('callable')
-        if callable_rule:
-            if callable_rule == 'before_exec' and self.__is_executed == True:
-                raise TwitterAPIClientError('"{}" cannot be called after executing exec.'.format(method_name))
-            if callable_rule == 'after_exec' and self.__is_executed == False:
-                raise TwitterAPIClientError('"{}" cannot be called before executing exec.'.format(method_name))
-        
-        # validation number of calls
-        count_rule = rule.get('call_count')
-        if count_rule:
-            if self.__is_executed == True:
-                raise TwitterAPIClientError('"{}" cannot be called after executing exec.'.format(method_name))
-            max_count = count_rule.get('max')
-            if max_count and max_count < self.__method_call_counter[method_name]:
-                raise TwitterAPIClientError('"{}" can be called up to {} times.'.format(method_name, max_count))
-        
-        # required check
-        required = rule.get('required')
-        if required == True:
-            if self.__is_executed == True:
-                raise TwitterAPIClientError('"{}" cannot be called after executing exec.'.format(method_name))
-        
-        # is media upload mode
-        media_upload_mode = rule.get('media_upload_mode')
-        if media_upload_mode == True:
-            if self.__is_media_upload == False:
-                raise TwitterAPIClientError('Cannot call "{}" because it is not in "media upload mode"'.format(method_name))
-        else:
-            if self.__is_media_upload == True:
-                raise TwitterAPIClientError('Cannot call "{}" because it is in "media upload mode"'.format(method_name))
 
     
     # -------------------------------------------------------------------------
@@ -386,10 +279,4 @@ class TwitterApiBaseClient(object, metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def _getRequiredParameterKeys(self) -> list:
         '''必須パラメータのキー一覧'''
-        raise NotImplementedError(sys._getframe().f_code.co_name)
-
-
-    @abc.abstractmethod
-    def _getFunctionsCallRule(self) -> dict:
-        '''関数呼び出しのルール定義'''
         raise NotImplementedError(sys._getframe().f_code.co_name)
