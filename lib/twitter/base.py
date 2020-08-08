@@ -57,8 +57,6 @@ class TwitterApiBaseClient(object, metaclass=abc.ABCMeta):
         self.__REQUEST_METHOD   = self._requestMethod().upper()
 
         self.__request_params   = None
-        self.__request_params_raw = {}
-
         self.__media_params     = None
         self.__is_media_upload  = False
 
@@ -75,21 +73,14 @@ class TwitterApiBaseClient(object, metaclass=abc.ABCMeta):
     # -----------------------------------------------------------------------
 
 
-    def setParam(self, key:str, value):
-        self.__request_params_raw[key] = value
-    
-
-    def setEncodeMediaFilePath(self, key:str, path:str):
-        self.setParam(key, {'is_encode' : True, 'file_path' : path})
-    
-
-    def setMediaFilePath(self, key:str, path:str):
-        self.setParam(key, {'is_encode' : False, 'file_path' : path})
-
-
-    def exec(self):
-        '''リクエスト実行
+    def exec(self, inp):
+        '''リクエスト実行(オーバーライド想定)
         '''
+        # get params
+        self.__request_params   = inp._getQueryParams()
+        self.__media_params     = inp._getPostParams()
+
+        # make request
         query_param_string  = ''
         if len(self.__getRequestParams()) > 0:
             query_param_string  = '?' + urllib.parse.urlencode(self.__getRequestParams())
@@ -106,6 +97,7 @@ class TwitterApiBaseClient(object, metaclass=abc.ABCMeta):
             
         req.add_header('Authorization', self.__buildOAuthHeader())
 
+        # request execute
         with urllib.request.urlopen(req) as res:
             self.__status   = res.status
             self.__headers  = res.getheaders()
@@ -217,29 +209,10 @@ class TwitterApiBaseClient(object, metaclass=abc.ABCMeta):
     
 
     def __getRequestParams(self) -> dict:
-        if self.__request_params is None:
-            # check required params
-            for key in self._getRequiredParameterKeys():
-                try:
-                    no_use = self.__request_params_raw[key]
-                except KeyError:
-                    # 例外を置き換える
-                    raise TwitterRequiredParameterError("Required request parameter '{}' is not set".format(key))
-            
-            if self.__is_media_upload:
-                self.__request_params   = {}
-                self.__media_params     = self.__request_params_raw
-            else:
-                self.__request_params   = self.__request_params_raw
-                self.__media_params     = {}
-        
         return self.__request_params
     
 
     def __getMediaParams(self) -> dict:
-        if self.__media_params is None:
-            self.__getRequestParams()
-        
         return self.__media_params
     
 
@@ -292,23 +265,31 @@ class TwitterApiBaseInput(object, metaclass=abc.ABCMeta):
         self.__post_params = {}
     
 
-    def _setQueryParam(self, key, value):
+    def _setQueryParam(self, key:str, value:str):
         self.__get_params[key] = value
     
 
-    def _setPostParam(self, key, value):
+    def _setPostParam(self, key:str, value):
         self.__post_params[key] = value
     
 
-    def _getQueryParams(self):
+    def _setEncodeMediaPath(self, key:str, path:str):
+        self._getPostParams(key, {'is_encode' : True, 'file_path' : path})
+    
+
+    def _setMediaPath(self, key:str, path:str):
+        self._getPostParams(key, {'is_encode' : False, 'file_path' : path})
+    
+
+    def _getQueryParams(self) -> dict:
         return self.__get_params
     
 
-    def _getPostParams(self):
+    def _getPostParams(self) -> dict:
         return self.__post_params
     
 
     @abc.abstractmethod
     def _checkInputCorrectness(self):
-        '''入力値の正当性チェック'''
+        '''入力値の正当性チェック。駄目だったら例外を投げる'''
         raise NotImplementedError(sys._getframe().f_code.co_name)
