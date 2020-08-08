@@ -280,3 +280,35 @@ class TwitterApiBaseClient(object, metaclass=abc.ABCMeta):
     def _getRequiredParameterKeys(self) -> list:
         '''必須パラメータのキー一覧'''
         raise NotImplementedError(sys._getframe().f_code.co_name)
+
+
+class TwitterApiBaseInput(object, metaclass=abc.ABCMeta):
+    '''入力値設定基底クラス
+    '''
+
+
+    def __init__(self):
+        self.__get_params = {}
+        self.__post_params = {}
+    
+
+    def _setQueryParam(self, key, value):
+        self.__get_params[key] = value
+    
+
+    def _setPostParam(self, key, value):
+        self.__post_params[key] = value
+    
+
+    def _getQueryParams(self):
+        return self.__get_params
+    
+
+    def _getPostParams(self):
+        return self.__post_params
+    
+
+    @abc.abstractmethod
+    def _checkInputCorrectness(self):
+        '''入力値の正当性チェック'''
+        raise NotImplementedError(sys._getframe().f_code.co_name)
