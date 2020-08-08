@@ -3,6 +3,8 @@ import datetime
 import calendar
 from lib.twitter.base import TwitterApiBaseClient, TwitterApiBaseInput, TwitterApiBaseOutput
 from lib.twitter.exception import TwitterAPIInputError
+from lib.twitter.object.tweets import ResponseObjectTweets
+from lib.twitter.object.searchMetadata import ResponseObjectSearchMetadata
 
 
 class TwitterApiSearchInput(TwitterApiBaseInput):
@@ -20,8 +22,8 @@ class TwitterApiSearchInput(TwitterApiBaseInput):
     def setSearchQuery(self, query:str):
         '''ツイートの検索文字列
         '''
-        MAX_LEN = 500
-        if len(tweet) > MAX_LENGTH:
+        MAX_LENGTH = 500
+        if len(query) > MAX_LENGTH:
             raise TwitterAPIInputError('Too many characters. Excess:{}'.format(len(tweet) - MAX_LENGTH))
         self.__search_query = query
     
@@ -88,6 +90,33 @@ class TwitterApiSearchOutput(TwitterApiBaseOutput):
 
     def __init__(self, results):
         super().__init__(results)
+
+        self.__tweets           = []
+        self.__result_count     = 0
+        self.__search_metadata  = None
+
+        contents                    = super().getContents()
+        tmp_tweets                  = contents.get('statuses')
+        for tweet_dict in tmp_tweets:
+            tweet                   = ResponseObjectTweets(tweet_dict)
+            self.__tweets.append(tweet)
+        self.__result_count         = len(self.__tweets)
+        
+        metadata = contents.get('search_metadata')
+        if metadata:
+            self.__search_metadata  = ResponseObjectSearchMetadata(metadata)
+    
+
+    def getTweetList(self) -> list:
+        return self.__tweets
+    
+
+    def getResultTweetsCount(self) -> int:
+        return self.__result_count
+    
+
+    def getSearchMetaData(self) -> ResponseObjectSearchMetadata:
+        return self.__search_metadata
 
 
 class TwitterApiSearchClient(TwitterApiBaseClient):
