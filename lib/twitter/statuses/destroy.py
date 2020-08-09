@@ -2,6 +2,7 @@ import re
 import sys
 from lib.twitter.base import TwitterApiBaseClient, TwitterApiBaseInput, TwitterApiBaseOutput
 from lib.twitter.exception import TwitterAPIClientError, TwitterAPIInputError
+from lib.twitter.object.tweets import ResponseObjectTweets
 
 
 class TwitterApiStatusesDestoryInput(TwitterApiBaseInput):
@@ -41,6 +42,11 @@ class TwitterApiStatusesDestoryInput(TwitterApiBaseInput):
 class TwitterApiStatusesDestoryOutput(TwitterApiBaseOutput):
     def __init__(self, results):
         super().__init__(results)
+        self.__deleted_tweet = ResponseObjectTweets(super().getContents())
+    
+
+    def getDeletedTweet(self) -> ResponseObjectTweets:
+        return self.__deleted_tweet
 
 
 class TwitterApiStatusesDestoryClient(TwitterApiBaseClient):
