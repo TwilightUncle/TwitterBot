@@ -1,3 +1,4 @@
+from lib.twitter.object import users, entities
 
 
 class ResponseObjectTweets(object):
@@ -26,9 +27,10 @@ class ResponseObjectTweets(object):
 
         self.__coordinates      = data.get('coordinates')
         self.__created_at       = data.get('created_at')
+        self.__entities         = self.__makeEntitiesObject(data.get('entities'))
         self.__favorite_count   = data.get('favorite_count')
         self.__tweet_id         = data.get('id_str')
-        self.__reply_tweet_id   = data.get('in_reply_to_status_id')
+        self.__reply_tweet_id   = data.get('in_reply_to_status_id_str')
         self.__reply_user_id    = data.get('in_reply_to_user_id_str')
         self.__lang             = data.get('lang')
         self.__quoted_status_id = data.get('quoted_status_id_str')
@@ -36,12 +38,25 @@ class ResponseObjectTweets(object):
         self.__retweet_count    = data.get('retweet_count')
         self.__retweeted_status = self.__makeTweetObject(data.get('retweeted_status'))
         self.__text             = data.get('text')
+        self.__user             = self.__makeUserObject(data.get('user'))
     
 
     def __makeTweetObject(data):
         if data is None:
             return None
         return ResponseObjectTweets(data)
+    
+
+    def __makeUserObject(data):
+        if data is None:
+            return None
+        return users.ResponseObjectUsers(data)
+    
+
+    def __makeEntitiesObject(data):
+        if data is None:
+            return None
+        return entities.ResponseObjectEntities(data)
     
 
     # ---------------------------------------------------------------------------
@@ -57,7 +72,7 @@ class ResponseObjectTweets(object):
         return self.__coordinates
     
 
-    def getCreatedAt(self):
+    def getCreatedAt(self) -> str:
         return self.__created_at
     
 
@@ -65,45 +80,51 @@ class ResponseObjectTweets(object):
         return self.__current_user_retweet
     
 
-    def getEntities(self):
+    def getEntities(self) -> entities.ResponseObjectEntities:
         return self.__entities
     
 
-    def getFavoriteCount(self):
+    def getFavoriteCount(self) -> int:
         return self.__favorite_count
     
 
-    def getContributorId(self):
-        return self.__user_id
+    def getTweetId(self) -> str:
+        return self.__tweet_id
     
 
-    def getReplyTweetId(self):
+    def getReplyTweetId(self) -> str:
         return self.__reply_tweet_id
     
 
-    def getReplyUserId(self):
+    def getReplyUserId(self) -> str:
         return self.__reply_user_id
     
 
-    def getLang(self):
+    def getLang(self) -> str:
         return self.__lang
     
 
-    def getQuotedTweetId(self):
+    def getQuotedTweetId(self) -> str:
         return self.__quoted_status_id
     
 
-    def getQuotedTweet(self):
+    def getQuotedTweet(self) -> ResponseObjectTweets:
         return self.__quoted_status
     
 
-    def getRetweetCount(self):
+    def getRetweetCount(self) -> int:
         return self.__retweet_count
     
 
-    def getRetweetedTweet(self):
+    def getRetweetedTweet(self) -> ResponseObjectTweets:
         return self.__retweeted_status
     
 
-    def getText(self):
+    def getText(self) -> str:
         return self.__text
+    
+
+    def getUser(self) -> users.ResponseObjectUsers:
+        '''ツイート投稿ユーザー
+        '''
+        return self.__user

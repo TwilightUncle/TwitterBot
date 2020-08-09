@@ -31,41 +31,41 @@ class ResponseObjectMedia(object):
     # --------------------------------------------------------------
 
 
-    def getDisplayUrl(self):
+    def getDisplayUrl(self) -> str:
         return self.__display_url
     
 
-    def getExpandedUrl(self):
+    def getExpandedUrl(self) -> str:
         return self.__expanded_url
     
 
-    def getMediaId(self):
+    def getMediaId(self) -> str:
         return self.__media_id
     
 
-    def getStart(self):
+    def getStart(self) -> int:
         return self.__start
     
 
-    def getEnd(self):
+    def getEnd(self) -> int:
         return self.__end
     
 
-    def getMediaUrl(self):
+    def getMediaUrl(self) -> str:
         return self.__media_url
 
     
-    def getMediaUrlHttps(self):
+    def getMediaUrlHttps(self) -> str:
         return self.__media_url_https
     
 
-    def getSizes(self):
+    def getSizes(self) -> sizes.ResponseObjectSizes:
         return self.__sizes
     
 
-    def getSourceTweetId(self):
+    def getSourceTweetId(self) -> str:
         return self.__source_status_id
     
 
-    def getMediaType(self):
+    def getMediaType(self) -> str:
         return self.__type

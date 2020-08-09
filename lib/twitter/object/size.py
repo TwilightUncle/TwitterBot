@@ -12,15 +12,15 @@ class ResponseObjectSize(object):
     # --------------------------------------------------------------
 
 
-    def getHeight(self):
+    def getHeight(self) -> int:
         return self.__height
     
 
-    def getWidth(self):
+    def getWidth(self) -> int:
         return self.__width
     
 
-    def getResize(self):
+    def getResize(self) -> str:
         '''戻り値は以下の二種類
         \n fit ... 元の縦横比を維持したまま一辺を合わせる形でサイズ変更
         \n crop ... 特定の解像度に合わせるためにメディアの切抜きが行われた

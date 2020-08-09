@@ -107,7 +107,7 @@ class TwitterApiSearchOutput(TwitterApiBaseOutput):
             self.__search_metadata  = ResponseObjectSearchMetadata(metadata)
     
 
-    def getTweetList(self) -> list:
+    def getTweetList(self) -> [ResponseObjectTweets]:
         return self.__tweets
     
 

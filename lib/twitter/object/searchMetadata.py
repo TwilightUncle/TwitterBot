@@ -16,25 +16,25 @@ class ResponseObjectSearchMetadata(object):
         self.__query            = urllib.parse.unquote(data.get('query'), 'utf-8')
     
 
-    def getMaxId(self):
+    def getMaxId(self) -> str:
         return self.__max_id
     
 
-    def getSinceId(self):
+    def getSinceId(self) -> str:
         return self.__since_id
     
 
-    def getRefreshUrl(self):
+    def getRefreshUrl(self) -> str:
         return self.__refresh_url
     
 
-    def getNextResults(self):
+    def getNextResults(self) -> str:
         return self.__next_results
     
 
-    def getResultsCount(self):
+    def getResultsCount(self) -> int:
         return self.__results_count
     
 
-    def getSearchQuery(self):
+    def getSearchQuery(self) -> str:
         return self.__query

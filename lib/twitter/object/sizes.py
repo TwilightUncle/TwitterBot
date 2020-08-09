@@ -20,17 +20,17 @@ class ResponseObjectSizes(object):
     # --------------------------------------------------------------
 
 
-    def getThumbSize(self):
+    def getThumbSize(self) -> size.ResponseObjectSize:
         return self.__thumb
     
 
-    def getLargeSize(self):
+    def getLargeSize(self) -> size.ResponseObjectSize:
         return self.__large
     
 
-    def getMediumSize(self):
+    def getMediumSize(self) -> size.ResponseObjectSize:
         return self.__medium
     
 
-    def getSmallSize(self):
+    def getSmallSize(self) -> size.ResponseObjectSize:
         return self.__small
