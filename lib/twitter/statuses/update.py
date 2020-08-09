@@ -2,6 +2,7 @@ import re
 import sys
 from lib.twitter.base import TwitterApiBaseClient, TwitterApiBaseInput, TwitterApiBaseOutput
 from lib.twitter.exception import TwitterValidateParamaterError, TwitterAPIInputError
+from lib.twitter.object.tweets import ResponseObjectTweets
 
 
 class TwitterApiStatusesUpdateInput(TwitterApiBaseInput):
@@ -52,6 +53,11 @@ class TwitterApiStatusesUpdateInput(TwitterApiBaseInput):
 class TwitterApiStatusesUpdateOutput(TwitterApiBaseOutput):
     def __init__(self, results):
         super().__init__(results)
+        self.__tweet = ResponseObjectTweets(super().getContents())
+    
+
+    def getTweet(self) -> ResponseObjectTweets:
+        return self.__tweet
 
 
 class TwitterApiStatusesUpdateClient(TwitterApiBaseClient):
