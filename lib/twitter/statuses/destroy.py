@@ -1,5 +1,4 @@
 import re
-import sys
 from lib.twitter.base import TwitterApiBaseClient, TwitterApiBaseInput, TwitterApiBaseOutput
 from lib.twitter.exception import TwitterAPIClientError, TwitterAPIInputError
 from lib.twitter.object.tweets import ResponseObjectTweets
@@ -64,7 +63,7 @@ class TwitterApiStatusesDestoryClient(TwitterApiBaseClient):
     # --------------------------
 
 
-    def exec(self, inp) -> TwitterApiStatusesDestoryOutput:
+    def exec(self, inp:TwitterApiStatusesDestoryInput) -> TwitterApiStatusesDestoryOutput:
         # make endpoint
         super()._addPath('statuses/destroy')
         super()._addPath(inp.getDestroyId())

@@ -1,5 +1,4 @@
 import re
-import sys
 from lib.twitter.base import TwitterApiBaseClient, TwitterApiBaseInput, TwitterApiBaseOutput
 from lib.twitter.exception import TwitterValidateParamaterError, TwitterAPIInputError
 from lib.twitter.object.tweets import ResponseObjectTweets
@@ -75,7 +74,7 @@ class TwitterApiStatusesUpdateClient(TwitterApiBaseClient):
     # --------------------------
 
 
-    def exec(self, inp) -> TwitterApiStatusesUpdateOutput:
+    def exec(self, inp:TwitterApiStatusesUpdateInput) -> TwitterApiStatusesUpdateOutput:
         super()._addPath('statuses/update')
         super()._addExtension('json')
         results = super().exec(inp)

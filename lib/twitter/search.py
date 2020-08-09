@@ -134,7 +134,7 @@ class TwitterApiSearchClient(TwitterApiBaseClient):
     # --------------------------
     
 
-    def exec(self, inp) -> TwitterApiSearchOutput:
+    def exec(self, inp:TwitterApiSearchInput) -> TwitterApiSearchOutput:
         super()._addPath('search/tweets')
         super()._addExtension('json')
         results = super().exec(inp)
