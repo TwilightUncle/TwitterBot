@@ -11,12 +11,8 @@ import json
 import configparser
 import copy
 
-import random, string
+from lib.utils import generateRandomString
 from lib.twitter.exception import TwitterRequiredParameterError, TwitterAPIClientError
-
-
-def generateRandomString(n:int) -> str:
-    return ''.join(random.choices(string.ascii_letters + string.digits, k=n))
 
 
 # ==========================================================================
