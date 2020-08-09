@@ -3,26 +3,22 @@ from lib.twitter.object import hashtags, media, urls, userMentions
 
 class ResponseObjectEntities(object):
     def __init__(self, data):
-        self.__hashtags         = []
-        self.__media            = []
-        self.__urls             = []
-        self.__user_mentions    = []
+        self.__hashtags         = self.__checkNoneAndApplyListItems(data.get('hashtags')      , self.__makeHashtag)
+        self.__media            = self.__checkNoneAndApplyListItems(data.get('media')         , self.__makeMedia)
+        self.__urls             = self.__checkNoneAndApplyListItems(data.get('urls')          , self.__makeUrl)
+        self.__user_mentions    = self.__checkNoneAndApplyListItems(data.get('user_mentions') , self.__makeUserMention)
+    
 
-        hashtags = data.get('hashtags')
-        for hashtag in hashtags:
-            self.__hashtags.append(self.__makeHashtag(hashtag))
-        
-        med = data.get('media	')
-        for m in med:
-            self.__media.append(self.__makeMedia(m))
-
-        urls = data.get('urls')
-        for url in urls:
-            self.__urls.append(self.__makeUrl(url))
-        
-        user_mentions = data.get('user_mentions')
-        for mention in user_mentions:
-            self.__user_mentions.append(self.__makeUserMention(mention))
+    def __checkNoneAndApplyListItems(self, li:list, callback):
+        '''リストの各要素に関数を適用する
+        \n callback ... リストの各要素を引数として渡す関数
+        '''
+        if type(li) is not list:
+            return None
+        results = []
+        for item in li:
+            results.append(callback(item))
+        return results
     
 
     def __makeHashtag(self, data):

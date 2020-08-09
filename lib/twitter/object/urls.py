@@ -19,7 +19,7 @@ class ResponseObjectUrls(object):
     # --------------------------------------------------------------
 
 
-    def getDisplayUrl(self) str:
+    def getDisplayUrl(self) -> str:
         return self.__display_url
     
 

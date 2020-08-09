@@ -10,7 +10,7 @@ class ResponseObjectMedia(object):
         self.__end = None
         self.__media_url = data.get('media_url')
         self.__media_url_https = data.get('media_url_https')
-        self.__sizes = self.__makeObjectSizes(data.gat('sizes'))
+        self.__sizes = self.__makeObjectSizes(data.get('sizes'))
         self.__source_status_id = data.get('source_status_id_str')
         self.__type = data.get('type')
 

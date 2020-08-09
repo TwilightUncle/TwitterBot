@@ -41,19 +41,19 @@ class ResponseObjectTweets(object):
         self.__user             = self.__makeUserObject(data.get('user'))
     
 
-    def __makeTweetObject(data):
+    def __makeTweetObject(self, data):
         if data is None:
             return None
         return ResponseObjectTweets(data)
     
 
-    def __makeUserObject(data):
+    def __makeUserObject(self, data):
         if data is None:
             return None
         return users.ResponseObjectUsers(data)
     
 
-    def __makeEntitiesObject(data):
+    def __makeEntitiesObject(self, data):
         if data is None:
             return None
         return entities.ResponseObjectEntities(data)
@@ -108,7 +108,9 @@ class ResponseObjectTweets(object):
         return self.__quoted_status_id
     
 
-    def getQuotedTweet(self) -> ResponseObjectTweets:
+    def getQuotedTweet(self):
+        '''@return ResponseObjectTweets
+        '''
         return self.__quoted_status
     
 
@@ -116,7 +118,9 @@ class ResponseObjectTweets(object):
         return self.__retweet_count
     
 
-    def getRetweetedTweet(self) -> ResponseObjectTweets:
+    def getRetweetedTweet(self):
+        '''@return ResponseObjectTweets
+        '''
         return self.__retweeted_status
     
 

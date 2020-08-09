@@ -33,13 +33,13 @@ class ResponseObjectUsers(object):
         self.__url                                  = data.get('url')
 
         
-    def __makeTweetObject(data):
+    def __makeTweetObject(self, data):
         if data is None:
             return None
         return tweets.ResponseObjectTweets(data)
     
 
-    def __makeEntitiesObject(data):
+    def __makeEntitiesObject(self, data):
         if data is None:
             return None
         return entities.ResponseObjectEntities(data)
@@ -130,7 +130,7 @@ class ResponseObjectUsers(object):
         return self.__screen_name
     
 
-    def getRecentTweet(self) -> tweets.ResponseObjectTweets:
+    def getRecentTweet(self):
         return self.__status
     
 
