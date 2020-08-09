@@ -41,12 +41,8 @@ class TwitterApiStatusesUpdateInput(TwitterApiBaseInput):
         if self.__tweet is None:
             raise TwitterAPIInputError('rquired parameter is not input.')
         super()._setQueryParam('status', self.__tweet)
-
-        if self.__reply_target_id is not None:
-            super()._setQueryParam('in_reply_to_status_id', self.__reply_target_id)
-        
-        if self.__is_sensitive is None:
-            super()._setQueryParam('possibly_sensitive', self.__is_sensitive)
+        super()._setQueryParam('in_reply_to_status_id', self.__reply_target_id)
+        super()._setQueryParam('possibly_sensitive', self.__is_sensitive)
 
 
 class TwitterApiStatusesUpdateOutput(TwitterApiBaseOutput):

@@ -73,15 +73,9 @@ class TwitterApiSearchInput(TwitterApiBaseInput):
         if self.__search_query is None:
             raise TwitterAPIInputError('rquired parameter is not input.')
         super()._setQueryParam('q', self.__search_query)
-
-        if self.__count is not None:
-            super()._setQueryParam('count', self.__count)
-        
-        if self.__until is not None:
-            super()._setQueryParam('until', self.__until)
-        
-        if self.__result_type is not None:
-            super()._setQueryParam('result_type', self.__result_type)
+        super()._setQueryParam('count', self.__count)
+        super()._setQueryParam('until', self.__until)
+        super()._setQueryParam('result_type', self.__result_type)
 
 
 class TwitterApiSearchOutput(TwitterApiBaseOutput):

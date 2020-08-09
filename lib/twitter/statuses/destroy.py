@@ -33,9 +33,7 @@ class TwitterApiStatusesDestoryInput(TwitterApiBaseInput):
     def _checkInputCorrectness(self):
         if self.__destroy_id == '':
             raise TwitterAPIInputError('rquired parameter is not input.')
-
-        if self.__is_trim_user is not None:
-            super()._setQueryParam('trim_user', self.__is_trim_user)
+        super()._setQueryParam('trim_user', self.__is_trim_user)
 
 
 class TwitterApiStatusesDestoryOutput(TwitterApiBaseOutput):
