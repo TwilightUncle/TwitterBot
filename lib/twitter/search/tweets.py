@@ -7,7 +7,7 @@ from lib.twitter.object.tweets import ResponseObjectTweets
 from lib.twitter.object.searchMetadata import ResponseObjectSearchMetadata
 
 
-class TwitterApiSearchInput(TwitterApiBaseInput):
+class TwitterApiSearchTweetsInput(TwitterApiBaseInput):
     '''tweet検索apiパラメタ入力'''
 
 
@@ -78,7 +78,7 @@ class TwitterApiSearchInput(TwitterApiBaseInput):
         super()._setQueryParam('result_type', self.__result_type)
 
 
-class TwitterApiSearchOutput(TwitterApiBaseOutput):
+class TwitterApiSearchTweetsOutput(TwitterApiBaseOutput):
     '''tweet検索api出力'''
 
 
@@ -113,7 +113,7 @@ class TwitterApiSearchOutput(TwitterApiBaseOutput):
         return self.__search_metadata
 
 
-class TwitterApiSearchClient(TwitterApiBaseClient):
+class TwitterApiSearchTweetsClient(TwitterApiBaseClient):
     '''tweet検索apiクライアント
     \n http://westplain.sakuraweb.com/translate/twitter/Documentation/REST-APIs/Public-API/GET-search-tweets.cgi
     '''
@@ -128,13 +128,13 @@ class TwitterApiSearchClient(TwitterApiBaseClient):
     # --------------------------
     
 
-    def exec(self, inp:TwitterApiSearchInput) -> TwitterApiSearchOutput:
-        if not isinstance(inp, TwitterApiSearchInput):
+    def exec(self, inp:TwitterApiSearchTweetsInput) -> TwitterApiSearchTweetsOutput:
+        if not isinstance(inp, TwitterApiSearchTweetsInput):
             raise TwitterAPIClientError('invaild argment')
         super()._addPath('search/tweets')
         super()._addExtension('json')
         results = super().exec(inp)
-        return TwitterApiSearchOutput(results)
+        return TwitterApiSearchTweetsOutput(results)
     
 
     def _requestMethod(self) -> str:
