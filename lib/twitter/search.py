@@ -2,7 +2,7 @@ import sys
 import datetime
 import calendar
 from lib.twitter.base import TwitterApiBaseClient, TwitterApiBaseInput, TwitterApiBaseOutput
-from lib.twitter.exception import TwitterAPIInputError
+from lib.twitter.exception import TwitterAPIInputError, TwitterAPIClientError
 from lib.twitter.object.tweets import ResponseObjectTweets
 from lib.twitter.object.searchMetadata import ResponseObjectSearchMetadata
 
@@ -135,6 +135,8 @@ class TwitterApiSearchClient(TwitterApiBaseClient):
     
 
     def exec(self, inp:TwitterApiSearchInput) -> TwitterApiSearchOutput:
+        if not isinstance(inp, TwitterApiSearchInput):
+            raise TwitterAPIClientError('invaild argment')
         super()._addPath('search/tweets')
         super()._addExtension('json')
         results = super().exec(inp)

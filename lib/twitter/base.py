@@ -71,6 +71,9 @@ class TwitterApiBaseClient(object, metaclass=abc.ABCMeta):
     def exec(self, inp) -> dict:
         '''リクエスト実行(他に必要な処理あればオーバーライド想定)
         '''
+        if not isinstance(inp, TwitterApiBaseInput):
+            raise TwitterAPIClientError('invaild argment.')
+        
         # get params
         inp._checkInputCorrectness()
         self.__request_params   = inp._getQueryParams()
@@ -254,6 +257,8 @@ class TwitterApiBaseInput(object, metaclass=abc.ABCMeta):
     
 
     def _setQueryParam(self, key:str, value:str):
+        if value is None:
+            return
         self.__get_params[key] = value
     
 

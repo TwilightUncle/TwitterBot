@@ -64,6 +64,8 @@ class TwitterApiStatusesDestoryClient(TwitterApiBaseClient):
 
 
     def exec(self, inp:TwitterApiStatusesDestoryInput) -> TwitterApiStatusesDestoryOutput:
+        if not isinstance(inp, TwitterApiStatusesDestoryInput):
+            raise TwitterAPIClientError('invaild argment.')
         # make endpoint
         super()._addPath('statuses/destroy')
         super()._addPath(inp.getDestroyId())
