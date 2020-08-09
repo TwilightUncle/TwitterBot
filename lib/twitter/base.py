@@ -10,6 +10,7 @@ import base64
 import json
 import configparser
 import copy
+import imghdr
 
 from lib.utils import generateRandomString
 from lib.twitter.exception import TwitterRequiredParameterError, TwitterAPIClientError
@@ -159,7 +160,7 @@ class TwitterApiBaseClient(object, metaclass=abc.ABCMeta):
         boundary = 'k-u-r-u-m-i-------------' + generateRandomString(32)
         delimiter = '--' + boundary
 
-        for param_name, value in self.__getMediaParams():
+        for param_name, value in self.__getMediaParams().items():
             # get value
             data = None
             if type(value) is str:
@@ -169,12 +170,10 @@ class TwitterApiBaseClient(object, metaclass=abc.ABCMeta):
                 file_path = value.get('file_path')
                 data = None
                 if file_path:
-                    with open(file_path) as media_file:
+                    with open(file_path, 'rb') as media_file:
                         data = media_file.read()
-                    
                     if value.get('is_encode') == True:
                         data = base64.b64encode(data)
-                    
                     data = data.decode('utf-8')
             
             if data is None:
@@ -184,6 +183,8 @@ class TwitterApiBaseClient(object, metaclass=abc.ABCMeta):
             param = []
             param.append(delimiter)
             param.append('Content-Disposition: form-data; name="{}"; '.format(param_name))
+            if value.get('is_encode') == True:
+                param.append('Content-Transfer-Encoding: base64')
             param.append('')
             param.append(data)
 
@@ -191,8 +192,7 @@ class TwitterApiBaseClient(object, metaclass=abc.ABCMeta):
             params.append("\r\n".join(param))
         
         params.append(delimiter + "--\r\n\r\n")
-
-        return boundary, "\r\n".join(params)
+        return boundary, ("\r\n".join(params)).encode('utf-8')
     
 
     def __getRequestParams(self) -> dict:
@@ -226,12 +226,18 @@ class TwitterApiBaseClient(object, metaclass=abc.ABCMeta):
         self.__endpoint += '.' + ext
     
 
+    def _setEndPoint(self, url:str):
+        '''endpointにそのまま代入する
+        '''
+        self.__endpoint = url
+    
+
     def _setMediaUploadMode(self):
         '''メディアアップロード系のエンドポイントではこれをコンストラクタで呼び出す
         '''
         self.__is_media_upload = True
 
-    
+
     # -------------------------------------------------------------------------
     # abstract methods
     # -------------------------------------------------------------------------
@@ -266,12 +272,12 @@ class TwitterApiBaseInput(object, metaclass=abc.ABCMeta):
         self.__post_params[key] = value
     
 
-    def _setEncodeMediaPath(self, key:str, path:str):
-        self._getPostParams(key, {'is_encode' : True, 'file_path' : path})
+    def _setEncodeMediaPath(self, key:str, path:str, mime_type:str):
+        self._setPostParam(key, {'is_encode' : True, 'file_path' : path, 'mime_type' : mime_type})
     
 
-    def _setMediaPath(self, key:str, path:str):
-        self._getPostParams(key, {'is_encode' : False, 'file_path' : path})
+    def _setMediaPath(self, key:str, path:str, mime_type:str):
+        self._setPostParam(key, {'is_encode' : False, 'file_path' : path, 'mime_type' : mime_type})
     
 
     def _getQueryParams(self) -> dict:
@@ -280,6 +286,19 @@ class TwitterApiBaseInput(object, metaclass=abc.ABCMeta):
 
     def _getPostParams(self) -> dict:
         return self.__post_params
+    
+
+    def _checkImageFile(self, file_path:str) -> str:
+        if file_path is None:
+            raise TwitterAPIInputError('path is None.')
+
+        if not os.path.isfile(file_path):
+            raise TwitterAPIInputError('The specified file does not exist.')
+
+        image_type = imghdr.what(file_path)
+        if image_type is None:
+            raise TwitterAPIInputError('Please specify the image file')
+        return image_type
     
 
     @abc.abstractmethod
@@ -312,6 +331,6 @@ class TwitterApiBaseOutput(object, metaclass=abc.ABCMeta):
         return self.__headers
     
 
-    def getContents(self):
+    def getContents(self) -> dict:
         '''contents'''
         return self.__contents
