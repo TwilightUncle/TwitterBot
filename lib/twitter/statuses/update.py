@@ -13,6 +13,8 @@ class TwitterApiStatusesUpdateInput(TwitterApiBaseInput):
         self.__tweet            = None
         self.__reply_target_id  = None
         self.__is_sensitive     = None
+        self.__media_ids        = None
+        self.__media_count      = 0
     
 
     def setTweet(self, tweet:str):
@@ -37,12 +39,28 @@ class TwitterApiStatusesUpdateInput(TwitterApiBaseInput):
         self.__is_sensitive = 'true' if is_sensitive else 'false'
     
 
+    def setMediaId(self, id:str):
+        '''アップロード済みのmedia idをひとつづつ指定する'''
+        p = re.compile('\d+')
+        if p.fullmatch(id) is None:
+            raise TwitterAPIInputError('Only numbers can be specified in the argument.')
+        if self.__media_count >= 4:
+            raise TwitterAPIInputError('You can specify up to 4')
+        if self.__media_ids is None:
+            self.__media_ids = []
+        self.__media_ids.append(id)
+        self.__media_count += 1
+    
+
     def _checkInputCorrectness(self):
         if self.__tweet is None:
             raise TwitterAPIInputError('rquired parameter is not input.')
         super()._setQueryParam('status', self.__tweet)
         super()._setQueryParam('in_reply_to_status_id', self.__reply_target_id)
         super()._setQueryParam('possibly_sensitive', self.__is_sensitive)
+
+        if self.__media_ids is not None:
+            super()._setQueryParam('media_ids', ','.join(self.__media_ids))
 
 
 class TwitterApiStatusesUpdateOutput(TwitterApiBaseOutput):
