@@ -17,13 +17,13 @@ class ResponseObjectHashtags(object):
     # --------------------------------------------------------------    
 
 
-    def getStart(self):
+    def getStart(self) -> int:
         return self.__start
     
 
-    def getEnd(self):
+    def getEnd(self) -> int:
         return self.__end
     
 
-    def getText(self):
+    def getText(self) -> str:
         return self.__text
