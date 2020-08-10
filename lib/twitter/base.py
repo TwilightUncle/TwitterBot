@@ -262,10 +262,21 @@ class TwitterApiBaseInput(object, metaclass=abc.ABCMeta):
         self.__post_params = {}
     
 
-    def _setQueryParam(self, key:str, value:str):
+    def _setQueryParam(self, key:str, value):
         if value is None:
             return
         self.__get_params[key] = value
+    
+
+    def _setQueryEncodeFilePath(self, key:str, path:str):
+        '''get parameterにファイルの64エンコードバイナリデータを追加する'''
+        if path is None:
+            return
+        with open(path, 'rb') as file:
+            data = file.read()
+        data = base64.b64encode(data)
+        data = data.decode('utf-8')
+        self._setQueryParam(key, data)
     
 
     def _setPostParam(self, key:str, value):
