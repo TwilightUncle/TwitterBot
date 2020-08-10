@@ -36,6 +36,10 @@ def create_app(config_name='default', db_path=None):
     app.register_blueprint(oauth.app, url_prefix='/oauth')
 
     app.add_url_rule('/', endpoint='index')
+
+    # register cli commands
+    from app.jobs import job
+    app.cli.add_command(job)
     
     # check exist instance directory
     try:
