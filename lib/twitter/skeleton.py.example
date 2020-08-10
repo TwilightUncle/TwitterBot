@@ -14,6 +14,7 @@ class TwitterApi_xx_Input(TwitterApiBaseInput):
         # 必要ならば引数チェック
         self.__xx = xx
 
+
     def _checkInputCorrectness(self):
         if self.__xx is None:
             raise TwitterAPIInputError('rquired parameter is not input.')
