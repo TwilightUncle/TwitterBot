@@ -7,7 +7,8 @@
   <ul>
     {% if g.user %}
       <li><span>{{ g.user['name'] }}</span></li>
-      <li><a href="{{ url_for('auth.delete') }}">Delete</a></li>
+      <li><a href="{{ url_for('auth.delete') }}" onclick="return confirm('ほんとに削除しますか？');">Delete</a></li>
+      <li><a href="{{ url_for('auth.edit') }}">Edit</a></li>
       <li><a href="{{ url_for('auth.logout') }}">Log Out</a></li>
     {% else %}
       <li><span>Guest(not logined)</span></li>
