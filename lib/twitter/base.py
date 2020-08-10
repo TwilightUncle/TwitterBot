@@ -45,10 +45,12 @@ class TwitterApiBaseClient(object, metaclass=abc.ABCMeta):
                 api_key         = cfg.get('default', 'TWITTER_API_CONSUMER_KEY')
             if api_secret == '':
                 api_secret      = cfg.get('default', 'TWITTER_API_CONSUMER_KEY_SECRET')
-            if access_token == '':
-                access_token    = cfg.get('default', 'TWITTER_API_ACCESS_TOKEN')
-            if access_secret == '':
-                access_secret   = cfg.get('default', 'TWITTER_API_ACCESS_TOKEN_SECRET')
+
+            if self._useDefaultAccessToken():
+                if access_token == '':
+                    access_token    = cfg.get('default', 'TWITTER_API_ACCESS_TOKEN')
+                if access_secret == '':
+                    access_secret   = cfg.get('default', 'TWITTER_API_ACCESS_TOKEN_SECRET')
             
         self.__API_KEY          = api_key
         self.__API_SECRET       = api_secret
@@ -58,6 +60,7 @@ class TwitterApiBaseClient(object, metaclass=abc.ABCMeta):
 
         self.__request_params   = None
         self.__media_params     = None
+        self.__auth_extentions  = None
         self.__endpoint         = None
         self.__is_media_upload  = False
 
@@ -79,6 +82,7 @@ class TwitterApiBaseClient(object, metaclass=abc.ABCMeta):
         inp._checkInputCorrectness()
         self.__request_params   = inp._getQueryParams()
         self.__media_params     = inp._getPostParams()
+        self.__auth_extentions  = inp._getAuthHeaderExtentionParams()
 
         # make request
         query_param_string  = ''
@@ -101,7 +105,12 @@ class TwitterApiBaseClient(object, metaclass=abc.ABCMeta):
             results['status']   = res.status
             results['headers']  = res.getheaders()
             response            = res.read().decode('utf-8')
-            results['contents'] = json.loads(response)
+            if self._responseType() == 'json':
+                results['contents'] = json.loads(response)
+            elif self._responseType() == 'http_query':
+                results['contents'] = urllib.parse.parse_qs(response)
+            else:
+                results['contents'] = response
         
         # パラメータ等を初期化して、インスタンスを再利用できるようにする
         self.__initializeParams()
@@ -122,6 +131,7 @@ class TwitterApiBaseClient(object, metaclass=abc.ABCMeta):
             'oauth_nonce'               : generateRandomString(32),
             'oauth_version'             : '1.0'
         }
+        signature_params.update(self.__getAuthHeaderExtentionParams())
         auth_header_params = copy.copy(signature_params)
         # join request params
         signature_params.update(self.__getRequestParams())
@@ -203,9 +213,14 @@ class TwitterApiBaseClient(object, metaclass=abc.ABCMeta):
         return self.__media_params
     
 
+    def __getAuthHeaderExtentionParams(self) -> dict:
+        return self.__auth_extentions
+    
+
     def __initializeParams(self):
         self.__request_params   = None
         self.__media_params     = None
+        self.__auth_extentions  = None
         self.__endpoint         = self.__class__.__BASE_URL
     
 
@@ -248,6 +263,21 @@ class TwitterApiBaseClient(object, metaclass=abc.ABCMeta):
         raise NotImplementedError(sys._getframe().f_code.co_name)
 
 
+    def _useDefaultAccessToken(self) -> bool:
+        '''コンストラクタの引数で、アクセストークンに空文字が渡された時、
+        \n 設定ファイルに記述してあるデフォルトのアクセストークンを利用しようとするか否か。
+        \n アクセストークンを取得するエンドポイントにおいては、空文字のまま通さないといけないため。
+        '''
+        return True
+    
+
+    def _responseType(self) -> str:
+        '''レスポンスがjson以外だったら、以下のいずれかを指定
+        \n http_query
+        '''
+        return 'json'
+
+
 # ==========================================================================
 # 入力クラス
 # ==========================================================================
@@ -258,8 +288,9 @@ class TwitterApiBaseInput(object, metaclass=abc.ABCMeta):
 
 
     def __init__(self):
-        self.__get_params = {}
-        self.__post_params = {}
+        self.__get_params       = {}
+        self.__post_params      = {}
+        self.__auth_extentions  = {}
     
 
     def _setQueryParam(self, key:str, value):
@@ -291,12 +322,22 @@ class TwitterApiBaseInput(object, metaclass=abc.ABCMeta):
         self._setPostParam(key, {'is_encode' : False, 'file_path' : path, 'mime_type' : mime_type})
     
 
+    def _setAuthHeaderExtentionParam(self, key:str, value:str):
+        if value is None:
+            return
+        self.__auth_extentions[key] = value
+    
+
     def _getQueryParams(self) -> dict:
         return self.__get_params
     
 
     def _getPostParams(self) -> dict:
         return self.__post_params
+    
+
+    def _getAuthHeaderExtentionParams(self) -> dict:
+        return self.__auth_extentions
     
 
     def _checkImageFile(self, file_path:str) -> str:
