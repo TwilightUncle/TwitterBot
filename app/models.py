@@ -1,3 +1,4 @@
+from werkzeug.security import check_password_hash, generate_password_hash
 from app.database import db
 from app.const import constant
 from datetime import datetime
@@ -30,3 +31,24 @@ class User(db.Model):
     create_at       = db.Column(db.DateTime, default=datetime.now, nullable=False)
     update_at       = db.Column(db.DateTime, default=datetime.now, nullable=False)
     tweets          = db.relationship("Tweet", backref="tweets")
+
+
+    @classmethod
+    def create(cls, name, password, permission=3):
+        user = cls(name=name, password=generate_password_hash(password), permission=permission)
+        db.session.add(user)
+        return user
+    
+
+    @classmethod
+    def get_all(cls):
+        return db.session.query(cls).all()
+    
+
+    def update(self, name=None, password=None, permission=None):
+        if name:
+            self.name = name
+        if password:
+            self.password = generate_password_hash(password)
+        if permission:
+            self.permission = permission
