@@ -1,3 +1,4 @@
+import json
 import urllib.parse
 
 
@@ -8,12 +9,17 @@ class ResponseObjectSearchMetadata(object):
 
 
     def __init__(self, data:dict):
+        self.__row_data         = data
         self.__max_id           = data.get('max_id_str')
         self.__since_id         = data.get('since_id_str')
         self.__refresh_url      = data.get('refresh_url')
         self.__next_results     = data.get('next_results')
         self.__results_count    = data.get('count')
         self.__query            = urllib.parse.unquote(data.get('query'), 'utf-8')
+    
+
+    def __str__(self):
+        return json.dumps(self.__row_data, indent=2)
     
 
     def getMaxId(self) -> str:

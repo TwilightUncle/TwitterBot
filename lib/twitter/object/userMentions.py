@@ -1,7 +1,9 @@
+import json
 
 
 class ResponseObjectUserMentions(object):
     def __init__(self, data):
+        self.__row_data                 = data
         self.__mention_user_id          = data.get('id_str')
         self.__start                    = None
         self.__end                      = None
@@ -12,6 +14,10 @@ class ResponseObjectUserMentions(object):
         if indices is not None:
             self.__start = indices[0]
             self.__end = indices[1]
+    
+
+    def __str__(self):
+        return json.dumps(self.__row_data, indent=2)
     
 
     # --------------------------------------------------------------

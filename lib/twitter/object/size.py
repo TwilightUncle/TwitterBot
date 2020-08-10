@@ -1,10 +1,16 @@
+import json
 
 
 class ResponseObjectSize(object):
     def __init__(self, data):
+        self.__row_data = data
         self.__height   = data.get('h')
         self.__width    = data.get('w')
         self.__resize   = data.get('resize')
+    
+
+    def __str__(self):
+        return json.dumps(self.__row_data, indent=2)
     
 
     # --------------------------------------------------------------

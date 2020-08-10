@@ -1,3 +1,4 @@
+import json
 from lib.twitter.object import users, entities
 
 
@@ -8,6 +9,7 @@ class ResponseObjectTweets(object):
 
 
     def __init__(self, data:dict):
+        self.__row_data         = data
         self.__contributors     = None              # ResponseObjectContributorsを参照
         self.__coordinates      = None              # ResponseObjectCoordinatesを参照
         self.__created_at       = None              # ツイートが作成された時のUTC時間
@@ -39,6 +41,10 @@ class ResponseObjectTweets(object):
         self.__retweeted_status = self.__makeTweetObject(data.get('retweeted_status'))
         self.__text             = data.get('text')
         self.__user             = self.__makeUserObject(data.get('user'))
+    
+
+    def __str__(self):
+        return json.dumps(self.__row_data, indent=2)
     
 
     def __makeTweetObject(self, data):
@@ -128,7 +134,7 @@ class ResponseObjectTweets(object):
         return self.__text
     
 
-    def getUser(self) -> users.ResponseObjectUsers:
+    def getUser(self):
         '''ツイート投稿ユーザー
         '''
         return self.__user

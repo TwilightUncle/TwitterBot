@@ -1,13 +1,19 @@
+import json
 from lib.utils import checkIterableAndMap
 from lib.twitter.object import hashtags, media, urls, userMentions
 
 
 class ResponseObjectEntities(object):
     def __init__(self, data):
+        self.__row_data         = data
         self.__hashtags         = checkIterableAndMap(data.get('hashtags')         , self.__makeHashtag     , 'list')
         self.__media            = checkIterableAndMap(data.get('media')            , self.__makeMedia       , 'list')
         self.__urls             = checkIterableAndMap(data.get('urls')             , self.__makeUrl         , 'list')
         self.__user_mentions    = checkIterableAndMap(data.get('user_mentions')    , self.__makeUserMention , 'list')
+    
+
+    def __str__(self):
+        return json.dumps(self.__row_data, indent=2)
     
 
     def __makeHashtag(self, data):

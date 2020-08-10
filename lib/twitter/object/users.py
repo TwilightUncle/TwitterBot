@@ -1,3 +1,4 @@
+import json
 from lib.twitter.object import tweets, entities
 
 
@@ -8,6 +9,7 @@ class ResponseObjectUsers(object):
 
 
     def __init__(self, data):
+        self.__row_data                             = data
         self.__created_at                           = data.get('created_at')
         self.__default_profile                      = data.get('default_profile')    # true のとき、 背景を変更指定してない
         self.__default_profile_image                = data.get('default_profile_image')    # true の時プロフ画をアップロードしていない
@@ -31,6 +33,10 @@ class ResponseObjectUsers(object):
         self.__status                               = self.__makeTweetObject(data.get('status'))
         self.__statuses_count                       = data.get('statuses_count')
         self.__url                                  = data.get('url')
+    
+
+    def __str__(self):
+        return json.dumps(self.__row_data, indent=2)
 
         
     def __makeTweetObject(self, data):
