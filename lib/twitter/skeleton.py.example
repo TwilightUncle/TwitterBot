@@ -1,0 +1,67 @@
+from lib.twitter.base import TwitterApiBaseInput, TwitterApiBaseOutput, TwitterApiBaseClient
+from lib.twitter.exception import TwitterAPIInputError, TwitterAPIClientError
+
+
+class TwitterApi_xx_Input(TwitterApiBaseInput):
+    def __init__(self):
+        super().__init__()
+
+        # define send parameters
+        self.__xx = None
+    
+    
+    def setXX(self, xx):
+        # 必要ならば引数チェック
+        self.__xx = xx
+
+    def _checkInputCorrectness(self):
+        if self.__xx is None:
+            raise TwitterAPIInputError('rquired parameter is not input.')
+
+        super()._setQueryParam('xx', self.__xx) 
+
+
+class TwitterApi_xx_Output(TwitterApiBaseOutput):
+    def __init__(self, results):
+        super().__init__(results)
+        contents = super().getContents()
+
+        self.__xx = contents.get('xx')
+    
+
+    def getXX(self):
+        return self.__xx
+
+
+class TwitterApi_xx_Client(TwitterApiBaseClient):
+    def __init__(self, api_key='', api_secret='', access_token='', access_secret=''):
+        super().__init__(api_key, api_secret, access_token, access_secret)
+    
+
+    # --------------------------
+    # override functions
+    # --------------------------
+
+
+    def exec(self, inp:TwitterApi_xx_Input) -> TwitterApi_xx_Output:
+        if not isinstance(inp, TwitterApi_xx_Input):
+            raise TwitterAPIClientError('invaild argment.')
+        # set endpoint
+        super()._addPath('xx')
+        super()._addExtension('json')
+        # execute
+        results = super().exec(inp)
+        return TwitterApi_xx_Output(results)
+
+
+    def _requestMethod(self):
+        '''エンドポイントごとにGETかPOSTを指定'''
+        return 'POST'
+    
+
+    def _useDefaultAccessToken(self) -> bool:
+        '''コンストラクタの引数で、アクセストークンに空文字が渡された時、
+        \n 設定ファイルに記述してあるデフォルトのアクセストークンを利用しようとするか否か。
+        \n アクセストークンを取得するエンドポイントにおいては、空文字のまま通さないといけないためFalse。
+        '''
+        return True
