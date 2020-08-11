@@ -7,23 +7,35 @@
   <ul>
     {% if g.user %}
       <li><span>{{ g.user['name'] }}</span></li>
-      <li><a href="{{ url_for('auth.delete') }}" onclick="return confirm('ほんとに削除しますか？');">Delete</a></li>
-      <li><a href="{{ url_for('auth.edit') }}">Edit</a></li>
-      <li><a href="{{ url_for('auth.logout') }}">Log Out</a></li>
+      <li><a href="{{ url_for('auth.logout') }}">ログアウト</a></li>
     {% else %}
       <li><span>Guest(not logined)</span></li>
-      <li><a href="{{ url_for('auth.register') }}">Register</a></li>
-      <li><a href="{{ url_for('auth.login') }}">Log In</a></li>
+      <li><a href="{{ url_for('auth.login') }}">ログイン</a></li>
     {% endif %}
   </ul>
 </nav>
 
-<section class="content">
-  <header>
-    {% block header %}{% endblock %}
-  </header>
-  {% for message in get_flashed_messages() %}
-    <div class="flash">{{ message }}</div>
-  {% endfor %}
-  {% block content %}{% endblock %}
-</section>
+<div class="out-frame">
+  <aside class="side-menu">
+    <h1>サイドメニュー</h1>
+    <ul>
+      {% if g.user %}
+        <li><a href="{{ url_for('auth.edit') }}">アカウント情報を編集</a></li>
+        <li><a href="{{ url_for('auth.delete') }}" onclick="return confirm('ほんとに削除しますか？');">このアカウントを削除する</a></li>
+        <li><a href="{{ url_for('user.twitter_account') }}">ツイッターアカウント登録</a></li>
+      {% else %}
+        <li><a href="{{ url_for('auth.register') }}">ユーザー登録</a></li>
+      {% endif %}
+    </ul>
+  </aside>  
+
+  <section class="content">
+    <header>
+      {% block header %}{% endblock %}
+    </header>
+    {% for message in get_flashed_messages() %}
+      <div class="flash">{{ message }}</div>
+    {% endfor %}
+    {% block content %}{% endblock %}
+  </section>
+</div>
