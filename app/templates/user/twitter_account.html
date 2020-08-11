@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1>{% block title %}ツイッターアカウント登録{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+  <form method="post">
+    <label for="twitter_account_name">ツイッターのアカウント名を登録(@より後ろの部分のみ)</label>
+    <input type="text" name="twitter_account_name" id="twitter_account_name" required>
+    <input type="submit" value="登録">
+  </form>
+{% endblock %}

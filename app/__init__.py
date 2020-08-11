@@ -34,6 +34,8 @@ def create_app(config_name='default', db_path=None):
     app.register_blueprint(auth.app, url_prefix='/auth')
     from app.views import oauth
     app.register_blueprint(oauth.app, url_prefix='/oauth')
+    from app.views import user
+    app.register_blueprint(user.app, url_prefix='/user')
 
     app.add_url_rule('/', endpoint='index')
 
