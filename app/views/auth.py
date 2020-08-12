@@ -5,6 +5,7 @@ from flask import (
 from werkzeug.security import check_password_hash, generate_password_hash
 from app.database import db
 from app.models import User
+from app.const import constant
 from app.views.common import set_session_message
 
 
@@ -15,17 +16,36 @@ def login_required(view):
     @functools.wraps(view)
     def wrapped_view(**kwargs):
         if g.user is None:
-            set_session_message('Plese login.')
+            set_session_message('ログインしてください。')
             session['login_redirect'] = request.url
             return redirect(url_for('auth.login'))
-
         return view(**kwargs)
+    return wrapped_view
 
+
+def is_administrator(view):
+    @functools.wraps(view)
+    def wrapped_view(**kwargs):
+        if g.user.permission > constant.PERMISSION_ADMIN:
+            set_session_message('権限がないため、要求された画面は開けません。')
+            return redirect(url_for('web.index'))
+        return view(**kwargs)
+    return wrapped_view
+
+
+def is_staff(view):
+    @functools.wraps(view)
+    def wrapped_view(**kwargs):
+        if g.user.permission > constant.PERMISSION_BACKEND:
+            set_session_message('権限がないため、要求された画面は開けません。')
+            return redirect(url_for('web.index'))
+        return view(**kwargs)
     return wrapped_view
 
 
 @app.route('/register', methods=('GET', 'POST'))
 @login_required
+@is_staff
 def register():
     if request.method == 'POST':
         # get input
@@ -126,6 +146,10 @@ def load_logged_in_user():
         g.user = None
     else:
         g.user = db.session.query(User).filter(User.id==user_id).first()
+        if g.user.permission == constant.PERMISSION_ADMIN:
+            g.user.is_admin = 1
+        if g.user.permission <= constant.PERMISSION_BACKEND:
+            g.user.is_staff = 1
 
 
 @app.route('/logout')
