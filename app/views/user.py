@@ -30,7 +30,7 @@ def twitter_account():
                 404 : 'ツイッターアカウントが見つかりませんでした。',
                 'server_error' : 'ツイッターのサーバーエラーが発生しています。時間をおいて再度お試しください。'
             }
-            text = getHttpErrorText(e.code, error_texts)
+            text = getHttpErrorText(e, error_texts)
             error.append(text)
         else:
             twitter_user_id     = response.getUser().getUserId()

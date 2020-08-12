@@ -1,20 +1,22 @@
 import functools
 from flask import (
-    Blueprint, flash, g, redirect, render_template, request, session, url_for
+    Blueprint, flash, g, redirect, render_template, request, session, url_for, current_app
 )
 
 
 app = Blueprint('common', __name__)
 
 
-def getHttpErrorText(error_code:int, ext={}) -> str:
+def getHttpErrorText(err, ext={}) -> str:
+    logger = current_app.logger
+    logger.error(f'{err}')
     texts = {
         404 : 'リソースが見つかりませんでした。',
         'server_error' : '通信先でサーバーエラーが発生しています。時間をおいて再度お試しください。'
     }
     texts.update(ext)
-    code = error_code if error_code < 500 else 'server_error'
-    return texts.get(code, 'エラーが発生しました。サイト管理者にエラーコードと発生したURLをお知らせください。エラーコード:{}'.format(error_code))
+    code = err.code if err.code < 500 else 'server_error'
+    return texts.get(code, f'エラーが発生しました。サイト管理者にエラーコードと発生したURLをお知らせください。エラーコード:{err.code}')
 
 
 # -----------------------------------------------
