@@ -3,7 +3,7 @@ from flask import (
     Blueprint, flash, g, redirect, render_template, request, session, url_for
 )
 from app.database import db
-from app.views.common import set_session_message, getHttpErrorText
+from app.views.common import set_session_message, getHttpErrorText, getAllErrorText
 from app.views.auth import login_required
 from lib.twitter.users.show import TwitterApiUsersShowInput, TwitterApiUsersShowClient
 
@@ -32,6 +32,8 @@ def twitter_account():
             }
             text = getHttpErrorText(e, error_texts)
             error.append(text)
+        except Exception as e:
+            error.append(getAllErrorText(e))
         else:
             twitter_user_id     = response.getUser().getUserId()
         
