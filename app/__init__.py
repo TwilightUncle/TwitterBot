@@ -1,4 +1,6 @@
 import os
+import logging.config
+import yaml
 from flask import Flask
 from app.database import init_db
 from app.const import ApplicationConst
@@ -19,6 +21,11 @@ def create_app(config_name='default', db_path=None):
     app.config.from_pyfile('sensitive_data.cfg')
     if db_path:
         app.config['SQLALCHEMY_DATABASE_URI'] = db_path
+    
+    # initialize logger
+    with open('config.yaml') as file:
+        conf_dict = yaml.safe_load(file)
+        logging.config.dictConfig(conf_dict)
 
     # initialize database
     init_db(app)
