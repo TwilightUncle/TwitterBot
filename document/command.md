@@ -1,4 +1,10 @@
 # command list
+
+# module install
+'''
+$ pipenv install xx
+'''
+
 ## make sqlite file
 ```
 $ FLASK_APP=run.py flask shell
