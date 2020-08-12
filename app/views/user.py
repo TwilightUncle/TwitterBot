@@ -3,7 +3,7 @@ from flask import (
     Blueprint, flash, g, redirect, render_template, request, session, url_for
 )
 from app.database import db
-from app.views.common import set_session_message
+from app.views.common import set_session_message, getHttpErrorText
 from app.views.auth import login_required
 from lib.twitter.users.show import TwitterApiUsersShowInput, TwitterApiUsersShowClient
 
@@ -18,7 +18,6 @@ def twitter_account():
         twitter_account_name = request.form['twitter_account_name']
 
         error = []
-        code = 200
         if not twitter_account_name:
             error.append('入力してください。')
         try:
@@ -27,12 +26,14 @@ def twitter_account():
             client              = TwitterApiUsersShowClient()
             response            = client.exec(inp)
         except urllib.error.HTTPError as e:
-            code = e.code
+            error_texts = {
+                404 : 'ツイッターアカウントが見つかりませんでした。',
+                'server_error' : 'ツイッターのサーバーエラーが発生しています。時間をおいて再度お試しください。'
+            }
+            text = getHttpErrorText(e.code, error_texts)
+            error.append(text)
         else:
             twitter_user_id     = response.getUser().getUserId()
-        
-        if code == 404:
-                error.append('ツイッターアカウントが見つかりませんでした。')
         
         if not error:
             g.user.twitter_user_id = twitter_user_id
