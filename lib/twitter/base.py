@@ -100,17 +100,22 @@ class TwitterApiBaseClient(object, metaclass=abc.ABCMeta):
         req.add_header('Authorization', self.__buildOAuthHeader())
 
         # request execute
-        results = {}
-        with urllib.request.urlopen(req) as res:
-            results['status']   = res.status
-            results['headers']  = res.getheaders()
-            response            = res.read().decode('utf-8')
-            if self._responseType() == 'json':
-                results['contents'] = json.loads(response)
-            elif self._responseType() == 'http_query':
-                results['contents'] = urllib.parse.parse_qs(response)
-            else:
-                results['contents'] = response
+        try:
+            results = {}
+            with urllib.request.urlopen(req) as res:
+                results['status']   = res.status
+                results['headers']  = res.getheaders()
+                response            = res.read().decode('utf-8')
+                if self._responseType() == 'json':
+                    results['contents'] = json.loads(response)
+                elif self._responseType() == 'http_query':
+                    results['contents'] = urllib.parse.parse_qs(response)
+                else:
+                    results['contents'] = response
+        except urllib.error.HTTPError as err:
+            # レスポンスを表示させて、そのまま投げる
+            print(err.read().decode('utf-8'))
+            raise err
         
         # パラメータ等を初期化して、インスタンスを再利用できるようにする
         self.__initializeParams()
@@ -193,7 +198,8 @@ class TwitterApiBaseClient(object, metaclass=abc.ABCMeta):
             param = []
             param.append(delimiter)
             param.append('Content-Disposition: form-data; name="{}"; '.format(param_name))
-            if value.get('is_encode') == True:
+            if type(value) is dict and value.get('is_encode') == True:
+                param.append(f'Content-Type: {value.get("mime_type")}')
                 param.append('Content-Transfer-Encoding: base64')
             param.append('')
             param.append(data)
@@ -311,14 +317,20 @@ class TwitterApiBaseInput(object, metaclass=abc.ABCMeta):
     
 
     def _setPostParam(self, key:str, value):
+        if value is None:
+            return
         self.__post_params[key] = value
     
 
     def _setEncodeMediaPath(self, key:str, path:str, mime_type:str):
+        if path is None:
+            return
         self._setPostParam(key, {'is_encode' : True, 'file_path' : path, 'mime_type' : mime_type})
     
 
     def _setMediaPath(self, key:str, path:str, mime_type:str):
+        if path is None:
+            return
         self._setPostParam(key, {'is_encode' : False, 'file_path' : path, 'mime_type' : mime_type})
     
 
