@@ -75,30 +75,11 @@ class TwitterApiBaseClient(object, metaclass=abc.ABCMeta):
     def exec(self, inp) -> dict:
         '''リクエスト実行(他に必要な処理あればオーバーライド想定)
         '''
-        if not isinstance(inp, TwitterApiBaseInput):
-            raise TwitterAPIClientError('invaild argment.')
-        
-        # get params
-        inp._checkInputCorrectness()
-        self.__request_params   = inp._getQueryParams()
-        self.__media_params     = inp._getPostParams()
-        self.__auth_extentions  = inp._getAuthHeaderExtentionParams()
+        # set params
+        self.__setInputParams(inp)
 
         # make request
-        query_param_string  = ''
-        if len(self.__getRequestParams()) > 0:
-            query_param_string  = '?' + urllib.parse.urlencode(self.__getRequestParams())
-        endpoint            = self.__endpoint + query_param_string
-
-        req = None
-        if self.__is_media_upload:
-            content_type, body  = self.__buildMediaData()
-            req             = urllib.request.Request(endpoint, method=self.__REQUEST_METHOD, data=body)
-            req.add_header('Content-Type', content_type)
-            req.add_header('Content-Length', str(len(body)))
-        else:
-            req             = urllib.request.Request(endpoint, method=self.__REQUEST_METHOD)
-        req.add_header('Authorization', self.__buildOAuthHeader())
+        req = self.__makeRequest()
 
         # request execute
         try:
@@ -143,24 +124,11 @@ class TwitterApiBaseClient(object, metaclass=abc.ABCMeta):
         auth_header_params = copy.copy(signature_params)
         # join request params
         signature_params.update(self.__getRequestParams())
-        # sort and urlencode
-        sorted_params           = sorted(signature_params.items(),key=lambda x:x[0])
-        encoded_params          = urllib.parse.urlencode(sorted_params)
-        encoded_params          = urllib.parse.quote(encoded_params) # 更にエンコードが必要
-        encoded_key             = urllib.parse.quote(self.__API_SECRET) + '&' + urllib.parse.quote(self.__ACCESS_SECRET)
-        encoded_url             = urllib.parse.quote(self.__endpoint, safe='')
-        # make base string
-        signature_base_string   = self.__REQUEST_METHOD + '&' + encoded_url + '&' + encoded_params
-        # make signature
-        signature_hash          = hmac.new(
-            encoded_key.encode('utf-8'), 
-            signature_base_string.encode('utf-8'), 
-            hashlib.sha1
-        ).digest()
-        signature               = base64.b64encode(signature_hash)
+
         # header params
-        auth_header_params['oauth_signature'] = signature.strip().decode('utf-8')
+        auth_header_params['oauth_signature'] = self.__buildSignature(signature_params)
         sorted_auth_params = sorted(auth_header_params.items(), key=lambda  x:x[0])
+
         # make auth header
         str_list = []
         for k, v in sorted_auth_params:
@@ -171,7 +139,7 @@ class TwitterApiBaseClient(object, metaclass=abc.ABCMeta):
 
     def __buildMediaData(self) -> (str, bytes):
         '''画像送信等に対応。
-        \n Content-Type: multipart/form-data;のリクエストを作成。
+        \n Content-Type: multipart/form-data;のリクエストbodyを作成。
         \n Content-Typeヘッダに指定する文字列とリクエストボディに指定するバイト列のタプルを返す。
         '''
         body = []
@@ -181,38 +149,47 @@ class TwitterApiBaseClient(object, metaclass=abc.ABCMeta):
         delimiter = ('--' + boundary).encode()
 
         for param_name, value in self.__getMediaParams().items():
-            # get value
-            data = None
-            if type(value) is str:
-                data = value.encode()
-            
-            if type(value) is dict:
-                file_path = value.get('file_path')
-                if file_path:
-                    with open(file_path, 'rb') as media_file:
-                        data = media_file.read()
-                    if value.get('is_encode') == True:
-                        data = base64.b64encode(data)
-            
-            if data is None:
-                raise TwitterAPIClientError('incorrect input parameter type.')
-
             # build data
-            param = []
-            param.append(delimiter)
-            param.append(f'Content-Disposition: form-data; name="{param_name}"; '.encode())
-            if type(value) is dict:
-                param.append(f'Content-Type: {value.get("mime_type")}'.encode())
-                if value.get('is_encode') == True:
-                    param.append('Content-Transfer-Encoding: base64'.encode())
-            param.append(b'')
-            param.append(data)
+            param = self.__buildMultipartParam(delimiter, param_name, value)
 
             # append params
-            body.append(b"\r\n".join(param))
+            body.append(param)
         
         body.append(delimiter + b"--\r\n\r\n")
         return content_type, b"\r\n".join(body)
+    
+
+    def __buildMultipartParam(self, delimiter, key, value) -> bytes:
+        '''multipartパラメータの1つの送信パラメータを作成
+        '''
+        # get value
+        data = None
+        if type(value) is str:
+            data = value.encode()
+        
+        if type(value) is dict:
+            file_path = value.get('file_path')
+            if file_path:
+                with open(file_path, 'rb') as media_file:
+                    data = media_file.read()
+                if value.get('is_encode') == True:
+                    data = base64.b64encode(data)
+        
+        if data is None:
+            raise TwitterAPIClientError('incorrect input parameter type.')
+
+        # build data
+        param = []
+        param.append(delimiter)
+        param.append(f'Content-Disposition: form-data; name="{key}"; '.encode())
+        if type(value) is dict:
+            param.append(f'Content-Type: {value.get("mime_type")}'.encode())
+            if value.get('is_encode') == True:
+                param.append('Content-Transfer-Encoding: base64'.encode())
+        param.append(b'')
+        param.append(data)
+
+        return b"\r\n".join(param)
     
 
     def __getRequestParams(self) -> dict:
@@ -232,6 +209,65 @@ class TwitterApiBaseClient(object, metaclass=abc.ABCMeta):
         self.__media_params     = None
         self.__auth_extentions  = None
         self.__endpoint         = self.__class__.__BASE_URL
+    
+
+    def __setInputParams(self, inp):
+        '''TwitterApiBaseInpuの継承クラスのインスタンスを指定することで、値をセットする
+        '''
+        if not isinstance(inp, TwitterApiBaseInput):
+            raise TwitterAPIClientError('invaild argment.')
+
+        inp._checkInputCorrectness()
+        self.__request_params   = inp._getQueryParams()
+        self.__media_params     = inp._getPostParams()
+        self.__auth_extentions  = inp._getAuthHeaderExtentionParams()
+    
+
+    def __makeRequest(self):
+        '''送信するリクエストを生成する
+        '''
+        # build endpoint
+        query_param_string      = ''
+        if len(self.__getRequestParams()) > 0:
+            query_param_string  = '?' + urllib.parse.urlencode(self.__getRequestParams())
+        endpoint                = self.__endpoint + query_param_string
+
+        # make request
+        req = None
+        if self.__is_media_upload:
+            content_type, body  = self.__buildMediaData()
+            req                 = urllib.request.Request(endpoint, method=self.__REQUEST_METHOD, data=body)
+            req.add_header('Content-Type', content_type)
+            req.add_header('Content-Length', str(len(body)))
+        else:
+            req                 = urllib.request.Request(endpoint, method=self.__REQUEST_METHOD)
+        req.add_header('Authorization', self.__buildOAuthHeader())
+
+        return req
+    
+
+    def __buildSignature(self, signature_params) -> str:
+        '''認証ヘッダに追加する署名を生成する。
+        '''
+        # sort and urlencode
+        sorted_params           = sorted(signature_params.items(),key=lambda x:x[0])
+        encoded_params          = urllib.parse.urlencode(sorted_params)
+        encoded_params          = urllib.parse.quote(encoded_params) # 更にエンコードが必要
+        encoded_key             = urllib.parse.quote(self.__API_SECRET) + '&' + urllib.parse.quote(self.__ACCESS_SECRET)
+        encoded_url             = urllib.parse.quote(self.__endpoint, safe='')
+
+        # make base string
+        signature_base_string   = self.__REQUEST_METHOD + '&' + encoded_url + '&' + encoded_params
+        
+        # make signature
+        signature_hash          = hmac.new(
+            encoded_key.encode(), 
+            signature_base_string.encode(), 
+            hashlib.sha1
+        ).digest()
+        signature               = base64.b64encode(signature_hash)
+
+        return signature.decode()
     
 
     # -------------------------------------------------------------------------
