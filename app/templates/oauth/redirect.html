@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1>{% block title %}ツイッターアプリ連携{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}  
+  <form method="post">
+    ※下記ボタンをクリックするとツイッターの認証画面へリダイレクトします。
+    <input type="submit" value="アプリ連携する">
+  </form>
+{% endblock %}
