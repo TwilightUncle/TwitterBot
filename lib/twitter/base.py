@@ -92,9 +92,10 @@ class TwitterApiBaseClient(object, metaclass=abc.ABCMeta):
 
         req = None
         if self.__is_media_upload:
-            boundary, data  = self.__buildMediaData()
-            req             = urllib.request.Request(endpoint, method=self.__REQUEST_METHOD, data=data)
-            req.add_header('Content-Type', 'multipart/form-data; boundary=' + boundary)
+            content_type, body  = self.__buildMediaData()
+            req             = urllib.request.Request(endpoint, method=self.__REQUEST_METHOD, data=body)
+            req.add_header('Content-Type', content_type)
+            req.add_header('Content-Length', str(len(body)))
         else:
             req             = urllib.request.Request(endpoint, method=self.__REQUEST_METHOD)
         req.add_header('Authorization', self.__buildOAuthHeader())
@@ -166,30 +167,29 @@ class TwitterApiBaseClient(object, metaclass=abc.ABCMeta):
         return 'OAuth ' + ', '.join(str_list)
     
 
-    def __buildMediaData(self) -> tuple:
+    def __buildMediaData(self) -> (str, bytes):
         '''画像送信等に対応
         \n Content-Type: multipart/form-data;のリクエストを作成
         '''
-        params = []
+        body = []
         # boundary
         boundary = 'k-u-r-u-m-i-------------' + generateRandomString(32)
-        delimiter = '--' + boundary
+        content_type = 'multipart/form-data; boundary=' + boundary
+        delimiter = ('--' + boundary).encode()
 
         for param_name, value in self.__getMediaParams().items():
             # get value
             data = None
             if type(value) is str:
-                data = value
+                data = value.encode()
             
             if type(value) is dict:
                 file_path = value.get('file_path')
-                data = None
                 if file_path:
                     with open(file_path, 'rb') as media_file:
                         data = media_file.read()
                     if value.get('is_encode') == True:
                         data = base64.b64encode(data)
-                    data = data.decode('utf-8')
             
             if data is None:
                 raise TwitterAPIClientError('incorrect input parameter type.')
@@ -197,18 +197,18 @@ class TwitterApiBaseClient(object, metaclass=abc.ABCMeta):
             # build data
             param = []
             param.append(delimiter)
-            param.append('Content-Disposition: form-data; name="{}"; '.format(param_name))
+            param.append(f'Content-Disposition: form-data; name="{param_name}"; '.encode())
             if type(value) is dict and value.get('is_encode') == True:
-                param.append(f'Content-Type: {value.get("mime_type")}')
-                param.append('Content-Transfer-Encoding: base64')
-            param.append('')
+                param.append(f'Content-Type: {value.get("mime_type")}'.encode())
+                param.append('Content-Transfer-Encoding: base64'.encode())
+            param.append(b'')
             param.append(data)
 
             # append params
-            params.append("\r\n".join(param))
+            body.append(b"\r\n".join(param))
         
-        params.append(delimiter + "--\r\n\r\n")
-        return boundary, ("\r\n".join(params)).encode('utf-8')
+        body.append(delimiter + b"--\r\n\r\n")
+        return content_type, b"\r\n".join(body)
     
 
     def __getRequestParams(self) -> dict:
