@@ -106,3 +106,25 @@ class TwitterApiOauthRequestTokenClient(TwitterApiBaseClient):
 
     def __responseType(self) -> str:
         return 'http_query'
+
+
+def oauthRequestToken(
+    oauth_callback:str,
+    auth_access_type='read'
+) -> TwitterApiOauthRequestTokenOutput:
+    '''認証を行うためのトークンと、twitterの認証画面へのリダイレクトURLを取得する
+    \n -- params --
+    \n * oauth_callback ... twitterの認証画面から帰ってきて、結果を処理するためのURLを指定
+    \n * auth_access_type ... このapiが行うことができる権限の指定。'read': 読み込み専用。'write':ツイッターの投稿やプロフィールの変更も可。
+    \n -- exceptions --
+    \n * TwitterAPIInputError   ... 主に入力値の検証に失敗したとき投げられる
+    \n * TwitterAPIClientError  ... 主にリクエストの実行前に発生する例外。api key等が空の時などに投げられる
+    '''
+    # set params
+    inp = TwitterApiOauthRequestTokenInput()
+    inp.setOauthCallback(oauth_callback)
+    inp.setXAuthAccessType(auth_access_type)
+
+    # execute
+    client = TwitterApiOauthRequestTokenClient()
+    return client.exec(inp)
