@@ -42,7 +42,7 @@ class TwitterApiOauthRequestTokenOutput(TwitterApiBaseOutput):
         self.__oauth_redirect_once = 'https://api.twitter.com/oauth/authenticate?oauth_token='
 
     
-    def getOauthToken(self) str:
+    def getOauthToken(self) -> str:
         '''取得できなかった場合、None'''
         return self.__oauth_token
     
@@ -74,6 +74,7 @@ class TwitterApiOauthRequestTokenOutput(TwitterApiBaseOutput):
 class TwitterApiOauthRequestTokenClient(TwitterApiBaseClient):
     def __init__(self, api_key='', api_secret=''):
         super().__init__(api_key, api_secret)
+        super()._setNotUseAccessToken()
     
 
     # --------------------------
@@ -85,10 +86,9 @@ class TwitterApiOauthRequestTokenClient(TwitterApiBaseClient):
         if not isinstance(inp, TwitterApiOauthRequestTokenInput):
             raise TwitterAPIClientError('invaild argment.')
         # set endpoint
+        super()._setEndPoint('https://api.twitter.com/oauth/request_token')
         results = super().exec(inp)
-        super()._addPath('oauth/request_token')
-        super()._addExtension('json')
-        return TwitterApiOauthRequestTokenOutput
+        return TwitterApiOauthRequestTokenOutput(results)
 
 
     def _requestMethod(self):
@@ -123,7 +123,7 @@ def oauthRequestToken(
     # set params
     inp = TwitterApiOauthRequestTokenInput()
     inp.setOauthCallback(oauth_callback)
-    inp.setXAuthAccessType(auth_access_type)
+    # inp.setXAuthAccessType(auth_access_type)
 
     # execute
     client = TwitterApiOauthRequestTokenClient()

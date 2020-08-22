@@ -71,6 +71,7 @@ class TwitterApiBaseClient(object, metaclass=abc.ABCMeta):
         self.__auth_extentions  = None
         self.__endpoint         = None
         self.__is_media_upload  = False
+        self.__not_use_access_token = False
 
         self.__initializeParams()
     
@@ -121,13 +122,15 @@ class TwitterApiBaseClient(object, metaclass=abc.ABCMeta):
         '''OAuth の認証ヘッダを作成
         '''
         signature_params = {
-            'oauth_token'               : self.__ACCESS_TOKEN,
             'oauth_consumer_key'        : self.__API_KEY,
             'oauth_signature_method'    : 'HMAC-SHA1',
             'oauth_timestamp'           : str(int(time.time())),
             'oauth_nonce'               : generateRandomString(32),
             'oauth_version'             : '1.0'
         }
+        if not self.__not_use_access_token:
+            signature_params['oauth_token'] = self.__ACCESS_TOKEN
+
         signature_params.update(self.__getAuthHeaderExtentionParams())
         auth_header_params = copy.copy(signature_params)
         # join request params
@@ -140,7 +143,7 @@ class TwitterApiBaseClient(object, metaclass=abc.ABCMeta):
         # make auth header
         str_list = []
         for k, v in sorted_auth_params:
-            str_list.append('{}="{}"'.format(urllib.parse.quote(k), urllib.parse.quote(v)))
+            str_list.append('{}="{}"'.format(urllib.parse.quote(k), urllib.parse.quote(v, safe='')))
 
         return 'OAuth ' + ', '.join(str_list)
     
@@ -259,8 +262,15 @@ class TwitterApiBaseClient(object, metaclass=abc.ABCMeta):
         '''
         # sort and urlencode
         sorted_params           = sorted(signature_params.items(),key=lambda x:x[0])
-        encoded_params          = urllib.parse.urlencode(sorted_params)
-        encoded_params          = urllib.parse.quote(encoded_params) # 更にエンコードが必要
+        temp_queryparams = []
+        for k, v in sorted_params:
+            if k == 'oauth_callback':
+                temp_queryparams.append(f'{k}={v}')
+            else:
+                temp_queryparams.append(f'{k}={urllib.parse.quote(v)}')
+        # encoded_params          = urllib.parse.urlencode(sorted_params) 一部エンコードしてはいけない物があるので、こちらは廃止し、上のループを回す
+        encoded_params = '&'.join(temp_queryparams)
+        encoded_params          = urllib.parse.quote(encoded_params, safe='') # 更にエンコードが必要
         encoded_key             = urllib.parse.quote(self.__API_SECRET) + '&' + urllib.parse.quote(self.__ACCESS_SECRET)
         encoded_url             = urllib.parse.quote(self.__endpoint, safe='')
 
@@ -305,6 +315,12 @@ class TwitterApiBaseClient(object, metaclass=abc.ABCMeta):
         '''メディアアップロード系のエンドポイントではこれをコンストラクタで呼び出す
         '''
         self.__is_media_upload = True
+    
+
+    def _setNotUseAccessToken(self):
+        '''アプリ連携認証等で署名にoauth_tokenを利用しないとき、この関数をコンストラクタで呼び出す
+        '''
+        self.__not_use_access_token = True
 
 
     # -------------------------------------------------------------------------
