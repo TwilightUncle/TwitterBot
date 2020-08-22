@@ -43,14 +43,22 @@ class TwitterApiBaseClient(object, metaclass=abc.ABCMeta):
 
             if api_key == '':
                 api_key         = cfg.get('default', 'TWITTER_API_CONSUMER_KEY')
+                if api_key is None:
+                    raise TwitterAPIClientError('api key not specified.')
             if api_secret == '':
                 api_secret      = cfg.get('default', 'TWITTER_API_CONSUMER_KEY_SECRET')
+                if api_secret is None:                    
+                    raise TwitterAPIClientError('api secret not specified.')
 
             if self._useDefaultAccessToken():
                 if access_token == '':
                     access_token    = cfg.get('default', 'TWITTER_API_ACCESS_TOKEN')
+                    if access_token is None:                        
+                        raise TwitterAPIClientError('access token not specified.')
                 if access_secret == '':
                     access_secret   = cfg.get('default', 'TWITTER_API_ACCESS_TOKEN_SECRET')
+                    if access_secret is None:
+                        raise TwitterAPIClientError('access secret not specified.')
             
         self.__API_KEY          = api_key
         self.__API_SECRET       = api_secret
