@@ -198,9 +198,10 @@ class TwitterApiBaseClient(object, metaclass=abc.ABCMeta):
             param = []
             param.append(delimiter)
             param.append(f'Content-Disposition: form-data; name="{param_name}"; '.encode())
-            if type(value) is dict and value.get('is_encode') == True:
+            if type(value) is dict:
                 param.append(f'Content-Type: {value.get("mime_type")}'.encode())
-                param.append('Content-Transfer-Encoding: base64'.encode())
+                if value.get('is_encode') == True:
+                    param.append('Content-Transfer-Encoding: base64'.encode())
             param.append(b'')
             param.append(data)
 
