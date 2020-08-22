@@ -129,6 +129,8 @@ class TwitterApiBaseClient(object, metaclass=abc.ABCMeta):
 
 
     def __buildOAuthHeader(self) -> str:
+        '''OAuth の認証ヘッダを作成
+        '''
         signature_params = {
             'oauth_token'               : self.__ACCESS_TOKEN,
             'oauth_consumer_key'        : self.__API_KEY,
@@ -168,8 +170,9 @@ class TwitterApiBaseClient(object, metaclass=abc.ABCMeta):
     
 
     def __buildMediaData(self) -> (str, bytes):
-        '''画像送信等に対応
-        \n Content-Type: multipart/form-data;のリクエストを作成
+        '''画像送信等に対応。
+        \n Content-Type: multipart/form-data;のリクエストを作成。
+        \n Content-Typeヘッダに指定する文字列とリクエストボディに指定するバイト列のタプルを返す。
         '''
         body = []
         # boundary
@@ -301,6 +304,8 @@ class TwitterApiBaseInput(object, metaclass=abc.ABCMeta):
     
 
     def _setQueryParam(self, key:str, value):
+        '''url query string として送信するパラメータのkeyと値を指定
+        '''
         if value is None:
             return
         self.__get_params[key] = value
@@ -318,57 +323,82 @@ class TwitterApiBaseInput(object, metaclass=abc.ABCMeta):
     
 
     def _setPostParam(self, key:str, value):
+        '''post 送信のリクエストボディとして送信したいパラメータのkeyと値を指定
+        '''
         if value is None:
             return
         self.__post_params[key] = value
     
 
     def _setEncodeMediaPath(self, key:str, path:str, mime_type:str):
+        '''64エンコードして送信するメディアデータのファイルパスを指定
+        '''
         if path is None:
             return
         self._setPostParam(key, {'is_encode' : True, 'file_path' : path, 'mime_type' : mime_type})
     
 
     def _setMediaPath(self, key:str, path:str, mime_type:str):
+        '''そのままバイナリデータをを送信したいメディアファイルのファイルパスを指定
+        '''
         if path is None:
             return
         self._setPostParam(key, {'is_encode' : False, 'file_path' : path, 'mime_type' : mime_type})
     
 
     def _setAuthHeaderExtentionParam(self, key:str, value:str):
+        '''デフォルトで認証ヘッダ生成に利用される下記key以外のパラメータを追加したいときこの関数で指定する
+        \n ・oauth_token
+        \n ・oauth_consumer_key
+        \n ・oauth_signature_method
+        \n ・oauth_timestamp
+        \n ・oauth_nonce
+        \n ・oauth_version
+        '''
         if value is None:
             return
         self.__auth_extentions[key] = value
     
 
     def _getQueryParams(self) -> dict:
+        '''TwitterApiBaseInputの継承クラスで呼び出すことは想定していない
+        '''
         return self.__get_params
     
 
     def _getPostParams(self) -> dict:
+        '''TwitterApiBaseInputの継承クラスで呼び出すことは想定していない
+        '''
         return self.__post_params
     
 
     def _getAuthHeaderExtentionParams(self) -> dict:
+        '''TwitterApiBaseInputの継承クラスで呼び出すことは想定していない
+        '''
         return self.__auth_extentions
     
 
     def _checkImageFile(self, file_path:str) -> str:
+        '''指定したファイルパスが画像かどうかを判定し、画像であれば画像の種類を返す。
+        \n 画像でなければ例外を投げる。
+        '''
         if file_path is None:
-            raise TwitterAPIInputError('path is None.')
+            raise TwitterAPIInputError('argment is None.')
 
         if not os.path.isfile(file_path):
-            raise TwitterAPIInputError('The specified file does not exist.')
+            raise TwitterAPIInputError(f'The specified file does not exist. path="{file_path}"')
 
         image_type = imghdr.what(file_path)
         if image_type is None:
-            raise TwitterAPIInputError('Please specify the image file')
+            raise TwitterAPIInputError(f'Please specify the image file. "{file_path}" is not image.')
         return image_type
     
 
     @abc.abstractmethod
     def _checkInputCorrectness(self):
-        '''入力値の正当性チェック。駄目だったら例外を投げる'''
+        '''入力値の正当性チェック。駄目だったら例外を投げる。
+        \n 実装は継承先で行う。
+        '''
         raise NotImplementedError(sys._getframe().f_code.co_name)
 
 
