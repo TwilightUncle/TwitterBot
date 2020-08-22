@@ -69,3 +69,35 @@ class TwitterApiAccountUpdateProfileImageClient(TwitterApiBaseClient):
 
     def _requestMethod(self):
         return 'POST'
+
+
+def updateProfileImage(
+    image_file_path:str, 
+    is_include_entities=True,
+    is_skip_status=False,
+    access_token='',
+    access_secret=''
+) -> TwitterApiAccountUpdateProfileImageOutput:
+    '''Twitterプロフィール画像を更新する
+    \n -- params --
+    \n * image_file_path        ... 更新したい画像のファイルパスを指定
+    \n * is_include_entities    ... Falseを設定すると、レスポンスのユーザーオブジェクトにentitiesが含まれなくなる
+    \n * is_skip_status         ... Trueを設定するとレスポンスのユーザーオブジェクトにツイートが含まれなくなる
+    \n * access_token           ... 認証ユーザーのアクセストークン。
+    \n * access_secret          ... 認証ユーザーのアクセスシークレット
+    \n -- exceptions --
+    \n * TwitterAPIInputError   ... 主に入力値の検証に失敗したとき投げられる
+    \n * TwitterAPIClientError  ... 主にリクエストの実行前に発生する例外。api key等が空の時などに投げられる
+    '''
+    # set input
+    inp = TwitterApiAccountUpdateProfileImageInput()
+    inp.setImageFilePath(image_file_path)
+    inp.setIncludeEntities(is_include_entities)
+    inp.setSkipStatus(is_skip_status)
+
+    # execute
+    client = TwitterApiAccountUpdateProfileImageClient(
+        access_token=access_token, 
+        access_secret=access_secret
+    )
+    return client.exec(inp)

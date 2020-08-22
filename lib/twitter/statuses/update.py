@@ -29,6 +29,8 @@ class TwitterApiStatusesUpdateInput(TwitterApiBaseInput):
     def setReplyTargetId(self, id:str):
         '''リプする場合の対象tweet idをセット
         '''
+        if id is None:
+            return
         p = re.compile('\d+')
         if p.fullmatch(id) is None:
             raise TwitterAPIInputError('Only numbers can be specified in the argument.')
@@ -99,3 +101,40 @@ class TwitterApiStatusesUpdateClient(TwitterApiBaseClient):
 
     def _requestMethod(self) -> str:
         return 'POST'
+
+
+def statusesUpdate(
+    tweet:str,
+    reply_target_id=None,
+    is_sensitive=False,
+    media_ids=None,
+    access_token='',
+    access_secret=''
+) -> TwitterApiStatusesUpdateOutput:
+    '''ツイートを投稿する。
+    \n -- params --
+    \n * tweet                  ... ツイート本文
+    \n * reply_target_id        ... 投稿するツイートがリプライの時、対象のツイートIDを指定
+    \n * is_sensitive           ... センシティブな画像と思われるものを投稿するときTrue
+    \n * media_ids              ... 投稿するツイートに表示する画像等のメディアがあるとき利用。media/uploadエンドポイントでupload済みのメディアのIDをリストで最大4つまで指定
+    \n * access_token           ... 認証ユーザーのアクセストークン。
+    \n * access_secret          ... 認証ユーザーのアクセスシークレット
+    \n -- exceptions --
+    \n * TwitterAPIInputError   ... 主に入力値の検証に失敗したとき投げられる
+    \n * TwitterAPIClientError  ... 主にリクエストの実行前に発生する例外。api key等が空の時などに投げられる
+    '''
+    # set input
+    inp = TwitterApiStatusesUpdateInput()
+    inp.setTweet(tweet)
+    inp.setReplyTargetId(reply_target_id)
+    inp.setIsSensitive(is_sensitive)
+    if type(media_ids) is list:
+        for id in media_ids:
+            inp.setMediaId(id)
+    
+    # execute
+    client = TwitterApiStatusesUpdateClient(
+        access_token=access_token,
+        access_secret=access_secret
+    )
+    return client.exec(inp)
