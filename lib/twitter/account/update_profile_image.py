@@ -30,7 +30,9 @@ class TwitterApiAccountUpdateProfileImageInput(TwitterApiBaseInput):
             raise TwitterAPIInputError('rquired parameter is not input.')
 
         image_type = super()._checkImageFile(self.__image_file_path)
-        super()._setEncodeMediaPath('image', self.__image_file_path, 'image/' + image_type)
+        # media/uploadとは違いエンコード済みの画像はツイッター側で認識されなかったため、生データを送信
+        # super()._setEncodeMediaPath('image', self.__image_file_path, 'image/' + image_type)
+        super()._setMediaPath('image', self.__image_file_path, 'image/' + image_type)
         super()._setPostParam('include_entities', self.__include_entities)
         super()._setPostParam('skip_status', self.__skip_status)
 
