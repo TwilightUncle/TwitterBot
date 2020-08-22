@@ -23,6 +23,8 @@ class TwitterApi_xx_Input(TwitterApiBaseInput):
 
 
 class TwitterApi_xx_Output(TwitterApiBaseOutput):
+    '''レスポンスのオブジェクト化とドキュメンテーション
+    '''
     def __init__(self, results):
         super().__init__(results)
         contents = super().getContents()
