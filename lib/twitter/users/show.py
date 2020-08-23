@@ -81,3 +81,27 @@ class TwitterApiUsersShowClient(TwitterApiBaseClient):
         \n アクセストークンを取得するエンドポイントにおいては、空文字のまま通さないといけないためFalse。
         '''
         return True
+
+
+def usersShow(
+    user_id='',
+    screen_name=''
+) -> TwitterApiUsersShowOutput:
+    '''user_idまたはscreen_nameで指定したユーザーの情報を取得
+    \n -- params --
+    \n * user_id                ... ツイッターユーザーのID
+    \n * screen_name            ... "@"より後ろのユーザー名
+    \n -- exceptions --
+    \n * TwitterAPIInputError   ... 主に入力値の検証に失敗したとき投げられる
+    \n * TwitterAPIClientError  ... 主にリクエストの実行前に発生する例外。api key等が空の時などに投げられる
+    '''
+    # set input
+    inp                 = TwitterApiUsersShowInput()
+    if not user_id == '':
+        inp.setUserId(user_id)
+    if not screen_name == '':
+        inp.setScreenName(screen_name)
+    
+    # execute
+    client              = TwitterApiUsersShowClient()
+    return client.exec(inp)
