@@ -4,6 +4,7 @@ from app.const import constant
 from datetime import datetime
 
 from app.models.user import User
+from app.models.bot import Bot
 
 
 class TweetType(db.Model):
