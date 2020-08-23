@@ -11,6 +11,9 @@ $ FLASK_APP=run.py flask shell
 >>> from app.database import db
 >>> db.create_all()
 >>> exit()
+
+# or
+$ flask job first_insert --twitter_screen_name [screen_name]
 ```
 
 ## migrate
