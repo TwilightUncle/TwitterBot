@@ -31,6 +31,9 @@ def getAllErrorText(err) -> str:
 
 
 def set_session_message(message: str):
+    '''リダイレクト先でメッセージを表示させたいときこの関数を利用。
+    \n ただ、その画面に表示させたいときはflashを使うこと。
+    '''
     session['message'] = message
 
 

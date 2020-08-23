@@ -51,6 +51,8 @@ def register():
         # get input
         username = request.form['username']
         password = request.form['password']
+        permission = request.form.get('permission')
+        permission = permission or constant.PERMISSION_NOMAL
 
         # validate
         error = []
@@ -66,14 +68,14 @@ def register():
             user = User()
             user.name = username
             user.password = generate_password_hash(password)
+            user.permission = permission
             db.session.add(user)
             db.session.commit()
-            set_session_message('Registered user.')
-            return redirect(url_for('auth.login'))
+            flash('新規ユーザーを登録しました。')
+        else:
+            flash('\n'.join(error))
 
-        flash('\n'.join(error))
-
-    return render_template('auth/register.html')
+    return render_template('auth/register.html', permissions=constant.PERMISSION_NAMES)
 
 
 @app.route('/edit', methods=('GET', 'POST'))
@@ -90,7 +92,7 @@ def edit():
             error.append('Username is required.')
         if not password:
             error.append('Password is required.')
-        if db.session.query(User).filter(User.name==username).first() is not None:
+        if not g.user.name == username and db.session.query(User).filter(User.name==username).first() is not None:
             error.append('User "{}" is already registered.'.format(username))
 
         # register
@@ -99,9 +101,9 @@ def edit():
             user.name = username
             user.password = generate_password_hash(password)
             db.session.commit()
-            set_session_message('ユーザー情報を更新しました。')
-
-        flash('\n'.join(error))
+            flash('ユーザー情報を更新しました。')
+        else:
+            flash('\n'.join(error))
 
     return render_template('auth/edit.html')
 
