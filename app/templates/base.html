@@ -29,7 +29,7 @@
         <li><a href="{{ url_for('auth.delete') }}" onclick="return confirm('ほんとに削除しますか？');">このアカウントを削除する</a></li>
         <li><a href="{{ url_for('user.twitter_account') }}">ツイッターアカウント登録</a></li>
       {% else %}
-        <li><a href="{{ url_for('auth.register') }}">ユーザー登録</a></li>
+        {# <li><a href="{{ url_for('auth.register') }}">ユーザー登録</a></li> #}
       {% endif %}
     </ul>
   </aside>  

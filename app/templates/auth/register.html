@@ -10,6 +10,14 @@
     <input type="text" name="username" id="username" required>
     <label for="password">Password</label>
     <input type="password" name="password" id="password" required>
+    {% if g.user.is_admin %}
+      <label for="permission">権限</label>
+      <select name="permission">
+        {% for k, v in permissions.items() %}
+          <option value="{{ k }}">{{ v }}</option>
+        {% endfor %}
+      </select>
+    {% endif %}
     <input type="submit" value="Register">
   </form>
 {% endblock %}
