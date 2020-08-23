@@ -21,6 +21,7 @@ class User(db.Model):
     def create(cls, name, password, permission=3, twitter_user_id=None):
         user = cls(name=name, password=generate_password_hash(password), permission=permission, twitter_user_id=twitter_user_id)
         db.session.add(user)
+        db.session.flush()
         return user
     
 
