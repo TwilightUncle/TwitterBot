@@ -25,7 +25,7 @@ $ flask db init
 # migration スクリプト作成
 $ flask db migrate
 
-# migrationのスクリプトをDBに反映
+# migrationのスクリプトをDBに反映(db未作成の時もこちらを利用)
 $ flask db upgrade
 $ flask db downgrade
 ```
@@ -43,4 +43,9 @@ $ pytest -v
 insert, update, deleteするときは必ず最後に以下を記述する事!
 ```
 db.session.commit()
+```
+
+dbを新規作成した場合、下記を実行し、初期ユーザー名やパスワードを任意のものに変更しに行く
+```
+$ flask job first_insert --twitter_screen_name [screen_name]
 ```
