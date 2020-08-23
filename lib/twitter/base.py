@@ -13,7 +13,7 @@ import copy
 import imghdr
 
 from lib.utils import generateRandomString
-from lib.twitter.exception import TwitterRequiredParameterError, TwitterAPIClientError
+from lib.twitter.exception import TwitterRequiredParameterError, TwitterAPIClientError, TwitterAPIInputError
 
 
 # ==========================================================================
@@ -452,6 +452,16 @@ class TwitterApiBaseInput(object, metaclass=abc.ABCMeta):
         if image_type is None:
             raise TwitterAPIInputError(f'Please specify the image file. "{file_path}" is not image.')
         return image_type
+    
+
+    def _checkStringLength(self, string:str, max_length:int):
+        '''文字列の型確認及び文字の長さ確認。
+        \n だめだったら例外を投げ、問題なければ何も起きない
+        '''
+        if type(string) is not str or type(max_length) is not int:
+            raise TwitterAPIInputError('invaild argment type')
+        if len(string) > max_length:
+            raise TwitterAPIInputError('Too many characters. Excess:{}'.format(len(string) - max_length))
     
 
     @abc.abstractmethod
