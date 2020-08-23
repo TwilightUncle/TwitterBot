@@ -23,3 +23,38 @@ class Bot(db.Model):
     secret_token            = db.Column(db.Text, default='', nullable=False, comment='twitter認証ユーザー(bot)のシークレットトークン')
     create_at               = db.Column(db.DateTime, default=datetime.now, nullable=False)
     update_at               = db.Column(db.DateTime, default=datetime.now, nullable=False)
+
+
+    @classmethod
+    def create(cls, owner_id, twitter_user_id, screen_name, access_token='', secret_token=''):
+        bot = cls(owner_id=owner_id, twitter_user_id=twitter_user_id, screen_name=screen_name, access_token=access_token, secret_token=secret_token)
+        db.session.add(bot)
+        return bot
+    
+
+    @classmethod
+    def get_all(cls):
+        return db.session.query(cls).all()
+    
+
+    def update(self, screen_name=None, profile_name=None, url=None, location=None, description=None, link_color=None, profile_image_path=None, background_image_path=None, access_token=None, secret_token=None):
+        if screen_name:
+            self.screen_name = screen_name
+        if profile_name:
+            self.profile_name = profile_name
+        if url:
+            self.url = url
+        if location:
+            self.location = location
+        if description:
+            self.description = description
+        if link_color:
+            self.link_color = link_color
+        if profile_image_path:
+            self.profile_image_path = profile_image_path
+        if background_image_path:
+            self.background_image_path = background_image_path
+        if access_token:
+            self.access_token = access_token
+        if secret_token:
+            self.secret_token = secret_token
