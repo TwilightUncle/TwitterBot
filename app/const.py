@@ -15,4 +15,10 @@ class ApplicationConst:
     PERMISSION_BACKEND = 2
     PERMISSION_NOMAL = 3
 
+    PERMISSION_NAMES = {
+        PERMISSION_NOMAL : '一般会員',
+        PERMISSION_BACKEND : 'スタッフ',
+        PERMISSION_ADMIN : '管理者'
+    }
+
 constant = ApplicationConst()
