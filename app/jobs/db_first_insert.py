@@ -16,9 +16,6 @@ def db_first_insert_run(twitter_screen_name):
         return
 
     try:
-        # create db
-        db.create_all()
-
         # user
         password = generateRandomString(8)
         user = User.create('admin', password, 1)
