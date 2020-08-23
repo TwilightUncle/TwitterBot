@@ -146,6 +146,10 @@ def load_logged_in_user():
         g.user = None
     else:
         g.user = db.session.query(User).filter(User.id==user_id).first()
+        # 変にセッションは残っていて、データがないとき
+        if not g.user:
+            return
+            
         if g.user.permission == constant.PERMISSION_ADMIN:
             g.user.is_admin = 1
         if g.user.permission <= constant.PERMISSION_BACKEND:
