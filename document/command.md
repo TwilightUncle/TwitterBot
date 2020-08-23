@@ -16,8 +16,13 @@ $ FLASK_APP=run.py flask shell
 ## migrate
 flask-migrateをインストールしたので、db管理はこちらで。上記は忘れる。
 ```
+# migration directri作成
 $ flask db init
+
+# migration スクリプト作成
 $ flask db migrate
+
+# migrationのスクリプトをDBに反映
 $ flask db upgrade
 $ flask db downgrade
 ```
