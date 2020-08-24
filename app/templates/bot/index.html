@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1>{% block title %}Setting Bot{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+    <a href="">bot 新規作成</a>
+    <ul>
+        {% for item in bot_list %}
+            <li>
+                <a href="{{ url_for('bot.edit', bot_id=item.id) }}">編集する</a>
+                <p>profile_name : {{ item.profile_name }}</p>
+                <p>screen_name : @{{ item.screen_name }}</p>
+            </li>
+        {% endfor %}
+    </ul>
+{% endblock %}

@@ -24,6 +24,7 @@
         {% endif %}
         {% if g.user.is_staff %}
           <li><a href="{{ url_for('auth.register') }}">新規ユーザー登録</a></li>
+          <li><a href="{{ url_for('bot.index') }}">bot 編集トップ</a></li>
         {% endif %}
         <li><a href="{{ url_for('auth.edit') }}">アカウント情報を編集</a></li>
         <li><a href="{{ url_for('auth.delete') }}" onclick="return confirm('ほんとに削除しますか？');">このアカウントを削除する</a></li>

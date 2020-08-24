@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1>{% block title %}Setting Bot{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+    <p>botのtwitter user id : {{ bot.twitter_user_id }}</p>
+    <p>screen_name : @{{ bot.screen_name }}</p>
+    <form method="POST" enctype="multipart/form-data">
+        <label for="profile_name">プロフィール名</label>
+        <input 
+            type="text" 
+            name="profile_name" 
+            id="profile_name" 
+            {% if bot.profile_name %}value="{{ bot.profile_name }}"{% endif %}>
+
+        <label for="url">プロフィールに関連付けるurl</label>
+        <input 
+            type="text" 
+            name="url" 
+            id="url" 
+            {% if bot.url %}value="{{ bot.url }}"{% endif %}>
+
+        <label for="location">ロケーション</label>
+        <textarea name="location" id="location">
+                {% if bot.location %}{{ bot.location }}{% endif %}
+        </textarea>
+
+        <label for="description">自己紹介欄</label>
+        <textarea name="description" id="description">
+            {% if bot.description %}{{ bot.description }}{% endif %}
+        </textarea>
+
+        <label for="link_color">プロフィールリンクの色</label>
+        <input 
+            type="text" 
+            name="link_color" 
+            id="link_color" 
+            {% if bot.link_color %}value="{{ bot.link_color }}"{% endif %}>
+
+        <label for="profile_image_path">プロフィール画像</label>
+        <input 
+            type="file" 
+            name="profile_image_path" 
+            id="profile_image_path" 
+            {% if bot.profile_image_path %}value="{{ bot.profile_image_path }}"{% endif %}
+            accept="image/jpeg,image/png">
+
+        <label for="background_image_path">プロフィール背景画像</label>
+        <input 
+            type="file" 
+            name="background_image_path" 
+            id="background_image_path" 
+            {% if bot.background_image_path %}value="{{ bot.background_image_path }}"{% endif %}
+            accept="image/jpeg,image/png">
+    </form>
+{% endblock %}
