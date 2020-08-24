@@ -193,3 +193,150 @@ class TwitterApiStatusesTimelineClient(TwitterApiBaseClient):
 
     def _requestMethod(self) -> str:
         return 'GET'
+
+
+def __commonInput(
+    time_line_type:str,
+    count=0,
+    since_id='',
+    max_id=''
+) -> TwitterApiStatusesTimelineInput:
+    '''共通の入力値をセットする処理を行う。非公開想定
+    '''
+    inp = TwitterApiStatusesTimelineInput()
+    inp.setTimelineType(time_line_type)
+    if count > 0:
+        inp.setCount(count)
+    if not since_id == '':
+        inp.setSinceId(since_id)
+    if not max_id == '':
+        inp.setMaxId(max_id)
+    return inp
+
+
+def __commonExecute(
+    inp:TwitterApiStatusesTimelineInput,
+    access_token='',
+    access_secret=''
+) -> TwitterApiStatusesTimelineOutput:
+    '''共通の実行処理。非公開想定。
+    '''
+    client = TwitterApiStatusesTimelineClient(
+        access_token=access_token,
+        access_secret=access_secret
+    )
+    return client.exec(inp)
+
+
+def statusesMentionsTimeline(
+    count=0,
+    since_id='',
+    max_id='',
+    access_token='',
+    access_secret=''
+) -> TwitterApiStatusesTimelineOutput:
+    '''認証ユーザーのメンションのタイムラインを取得する
+    \n -- params --
+    \n * count                  ... 取得するツイートの数
+    \n * since_id               ... ここに指定したIDのツイートよりもより新しいツイートを取得する
+    \n * max_id                 ... ここに指定したIDのツイートよりもより古いツイートを取得する
+    \n * access_token           ... 認証ユーザーのアクセストークン。
+    \n * access_secret          ... 認証ユーザーのアクセスシークレット
+    \n -- exceptions --
+    \n * TwitterAPIInputError   ... 主に入力値の検証に失敗したとき投げられる
+    \n * TwitterAPIClientError  ... 主にリクエストの実行前に発生する例外。api key等が空の時などに投げられる
+    '''
+    # set input
+    inp = __commonInput(
+        time_line_type=TwitterTimelineType.MENTIONS,
+        count=count, 
+        since_id=since_id, 
+        max_id=max_id
+    )
+
+    # execute
+    response = __commonExecute(
+        inp=inp,
+        access_token=access_token,
+        access_secret=access_secret
+    )
+    return response
+
+
+def statusesHomeTimeline(
+    count=0,
+    since_id='',
+    max_id='',
+    exclude_replies=False,
+    access_token='',
+    access_secret=''
+) -> TwitterApiStatusesTimelineOutput:
+    '''認証ユーザーのホームで表示されるタイムラインを取得する
+    \n -- params --
+    \n * count                  ... 取得するツイートの数
+    \n * since_id               ... ここに指定したIDのツイートよりもより新しいツイートを取得する
+    \n * max_id                 ... ここに指定したIDのツイートよりもより古いツイートを取得する
+    \n * exclude_replies        ... Trueを指定すると、取得するタイムラインにリプライツイートを含まないようにする
+    \n * access_token           ... 認証ユーザーのアクセストークン。
+    \n * access_secret          ... 認証ユーザーのアクセスシークレット
+    \n -- exceptions --
+    \n * TwitterAPIInputError   ... 主に入力値の検証に失敗したとき投げられる
+    \n * TwitterAPIClientError  ... 主にリクエストの実行前に発生する例外。api key等が空の時などに投げられる
+    '''
+    # set input
+    inp = __commonInput(
+        time_line_type=TwitterTimelineType.HOME,
+        count=count, 
+        since_id=since_id, 
+        max_id=max_id
+    )
+    inp.setIsExcludeReplies(exclude_replies)
+
+    # execute
+    response = __commonExecute(
+        inp=inp,
+        access_token=access_token,
+        access_secret=access_secret
+    )
+    return response
+
+
+def statusesUserTimeline(
+    user_id='',
+    screen_name='',
+    count=0,
+    since_id='',
+    max_id='',
+    exclude_replies=False,
+    exclude_rts=True
+) -> TwitterApiStatusesTimelineOutput:
+    '''指定ユーザーのホームで表示されるタイムラインを取得する
+    \n -- params --
+    \n * user_id                ... タイムラインを表示したい対象ユーザーのID
+    \n * screen_name            ... タイムラインを表示したい対象ユーザーのスクリーン名("@"以下のユーザー名)
+    \n * count                  ... 取得するツイートの数
+    \n * since_id               ... ここに指定したIDのツイートよりもより新しいツイートを取得する
+    \n * max_id                 ... ここに指定したIDのツイートよりもより古いツイートを取得する
+    \n * exclude_replies        ... Trueを指定すると、取得するタイムラインにリプライツイートを含まないようにする
+    \n * exclude_rts            ... Trueを指定すると、取得するタイムラインにリツイートを含まないようにする
+    \n -- exceptions --
+    \n * TwitterAPIInputError   ... 主に入力値の検証に失敗したとき投げられる
+    \n * TwitterAPIClientError  ... 主にリクエストの実行前に発生する例外。api key等が空の時などに投げられる
+    '''
+    # set input
+    inp = __commonInput(
+        time_line_type=TwitterTimelineType.USER,
+        count=count, 
+        since_id=since_id, 
+        max_id=max_id
+    )
+    if not user_id == '':
+        inp.setUserId(user_id)
+    if not screen_name == '':
+        inp.setUserScreenName(screen_name)
+    inp.setIsExcludeReplies(exclude_replies)
+    inp.setIsExcludeRetweet(exclude_rts)
+
+    # execute
+    response = __commonExecute(inp=inp)
+    return response

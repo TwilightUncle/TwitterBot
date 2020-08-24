@@ -75,3 +75,29 @@ class TwitterApiStatusesDestoryClient(TwitterApiBaseClient):
 
     def _requestMethod(self) -> str:
         return 'POST'
+
+
+def statusesDestroy(
+    destroy_id:str,
+    access_token='',
+    access_secret=''
+) -> TwitterApiStatusesDestoryOutput:
+    '''destroy_idで指定した投稿済みのツイートを削除します。
+    \n -- params --
+    \n * destroy_id             ... 削除するツイートID
+    \n * access_token           ... 認証ユーザーのアクセストークン。
+    \n * access_secret          ... 認証ユーザーのアクセスシークレット
+    \n -- exceptions --
+    \n * TwitterAPIInputError   ... 主に入力値の検証に失敗したとき投げられる
+    \n * TwitterAPIClientError  ... 主にリクエストの実行前に発生する例外。api key等が空の時などに投げられる
+    '''
+    # set input
+    inp = TwitterApiStatusesDestoryInput()
+    inp.setDestroyId(destroy_id)
+
+    # execute
+    client = TwitterApiStatusesDestoryClient(
+        access_token=access_token,
+        access_secret=access_secret
+    )
+    return client.exec(inp)

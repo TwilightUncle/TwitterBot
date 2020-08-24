@@ -139,3 +139,34 @@ class TwitterApiSearchTweetsClient(TwitterApiBaseClient):
 
     def _requestMethod(self) -> str:
         return 'GET'
+
+
+def searchTweets(
+    search_query:str,
+    count=0,
+    until='',
+    result_type=''
+) -> TwitterApiSearchTweetsOutput:
+    '''任意のキーワードによるツイートの検索を実行。ほかのオプションは補足的な絞り込み要素。
+    \n -- params --
+    \n * searc_query            ... 検索文字列
+    \n * count                  ... 取得するツイートの数
+    \n * until                  ... 指定した日付より前に作成されたツイートを取得。 YYYY-MM-DD の形式で設定すること。
+    \n * result_type            ... 受け取る検索結果のタイプを指定。mixed:人気のあるツイートとリアルタイムのツイートの混合, recent:最近(リアルタイム)のツイートのみ取得, popular:人気のあるツイートのみ取得
+    \n -- exceptions --
+    \n * TwitterAPIInputError   ... 主に入力値の検証に失敗したとき投げられる
+    \n * TwitterAPIClientError  ... 主にリクエストの実行前に発生する例外。api key等が空の時などに投げられる
+    '''
+    # set input
+    inp = TwitterApiSearchTweetsInput()
+    inp.setSearchQuery(search_query)
+    if count > 0:
+        inp.setCount(count)
+    if not until == '':
+        inp.setUntil(until)
+    if not result_type == '':
+        inp.setResultType(result_type)
+    
+    # execute
+    client = TwitterApiSearchTweetsClient()
+    return client.exec(inp)
