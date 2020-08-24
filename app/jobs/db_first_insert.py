@@ -4,7 +4,7 @@ from flask.cli import with_appcontext
 from app.database import db, init_db
 from app.models import User, Bot
 from lib.utils import generateRandomString
-from lib.twitter.users.show import usersShow
+from lib.twitter import usersShow
 
 
 @click.command('first_insert', help="db data first insert. インターネット接続必須(twitter apiを利用するため)")

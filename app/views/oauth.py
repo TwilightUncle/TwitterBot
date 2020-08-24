@@ -4,7 +4,7 @@ from flask import (
 )
 from app.views.common import set_session_message, getHttpErrorText, getAllErrorText
 from app.views.auth import login_required, is_staff
-from lib.twitter.oauth.request_token import oauthRequestToken
+from lib.twitter import oauthRequestToken
 
 
 app = Blueprint('oauth', __name__)

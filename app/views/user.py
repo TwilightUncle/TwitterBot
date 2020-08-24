@@ -6,6 +6,7 @@ from app.database import db
 from app.views.common import set_session_message, getHttpErrorText, getAllErrorText
 from app.views.auth import login_required
 from lib.twitter.users.show import TwitterApiUsersShowInput, TwitterApiUsersShowClient
+from lib.twitter import usersShow
 
 
 app = Blueprint('user', __name__)
@@ -20,11 +21,10 @@ def twitter_account():
         error = []
         if not twitter_account_name:
             error.append('入力してください。')
+
         try:
-            inp                 = TwitterApiUsersShowInput()
-            inp.setScreenName(twitter_account_name)
-            client              = TwitterApiUsersShowClient()
-            response            = client.exec(inp)
+            response    = usersShow(screen_name=twitter_account_name)
+
         except urllib.error.HTTPError as e:
             error_texts = {
                 404 : 'ツイッターアカウントが見つかりませんでした。',
@@ -32,8 +32,10 @@ def twitter_account():
             }
             text = getHttpErrorText(e, error_texts)
             error.append(text)
+
         except Exception as e:
             error.append(getAllErrorText(e))
+            
         else:
             twitter_user_id     = response.getUser().getUserId()
         
