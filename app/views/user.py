@@ -5,7 +5,6 @@ from flask import (
 from app.database import db
 from app.views.common import set_session_message, getHttpErrorText, getAllErrorText
 from app.views.auth import login_required
-from lib.twitter.users.show import TwitterApiUsersShowInput, TwitterApiUsersShowClient
 from lib.twitter import usersShow
 
 
