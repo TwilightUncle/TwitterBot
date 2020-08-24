@@ -3,3 +3,5 @@
 .env
 *.log
 *.log.*
+/uploads/*
+!/uploads/.gitkeep
