@@ -39,20 +39,20 @@
             id="link_color" 
             {% if bot.link_color %}value="{{ bot.link_color }}"{% endif %}>
 
-        <label for="profile_image_path">プロフィール画像</label>
+        <label for="profile_image">プロフィール画像</label>
         <input 
             type="file" 
-            name="profile_image_path" 
-            id="profile_image_path" 
-            {% if bot.profile_image_path %}value="{{ bot.profile_image_path }}"{% endif %}
+            name="profile_image" 
+            id="profile_image" 
             accept="image/jpeg,image/png">
 
-        <label for="background_image_path">プロフィール背景画像</label>
+        <label for="background_image">プロフィール背景画像</label>
         <input 
             type="file" 
-            name="background_image_path" 
-            id="background_image_path" 
-            {% if bot.background_image_path %}value="{{ bot.background_image_path }}"{% endif %}
+            name="background_image" 
+            id="background_image" 
             accept="image/jpeg,image/png">
+        
+        <input type="submit" value="送信">
     </form>
 {% endblock %}
