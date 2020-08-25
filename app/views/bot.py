@@ -28,7 +28,9 @@ def edit(bot_id:int):
         error = []
 
         profile_image = request.files.get('profile_image')
+        profile_image_saved_filename = ''
         background_image = request.files.get('background_image')
+        background_image_saved_filename = ''
 
         if profile_image and not allowed_file(profile_image):
             error.append('プロフィール画像に想定していない種類のファイルが送信されました。')
@@ -37,9 +39,18 @@ def edit(bot_id:int):
 
         if not error:
             if profile_image:
-                saveUploadedImage(profile_image, f"{current_app.config['UPLOAD_BOT_PROFILE_IMAGE_FOLDER']}/{bot_id}")
+                profile_image_saved_filename = saveUploadedImage(
+                    profile_image, 
+                    f"{current_app.config['UPLOAD_BOT_PROFILE_IMAGE_FOLDER']}/{bot_id}"
+                )
             if background_image:
-                saveUploadedImage(background_image, f"{current_app.config['UPLOAD_BOT_PROFILE_BACKGROUND_IMAGE_FOLDER']}/{bot_id}")
+                background_image_saved_filename = saveUploadedImage(
+                    background_image, 
+                    f"{current_app.config['UPLOAD_BOT_PROFILE_BACKGROUND_IMAGE_FOLDER']}/{bot_id}"
+                )
+        
+        if not error:
+            pass
         else:
             flash('\n'.join(error))
 

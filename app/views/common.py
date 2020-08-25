@@ -37,8 +37,8 @@ def allowed_file(file):
     return True
 
 
-def saveUploadedImage(uploaded_file, save_dir_path):
-    '''アップロード画像保存
+def saveUploadedImage(uploaded_file, save_dir_path) -> str:
+    '''アップロード画像保存。ファイル名を返す
     '''
     def generateFilename():
         r_str = generateRandomString(32)
@@ -56,6 +56,7 @@ def saveUploadedImage(uploaded_file, save_dir_path):
 
     # 保存
     uploaded_file.save(file_name)
+    return file_name
 
 
 # -----------------------------------------------
