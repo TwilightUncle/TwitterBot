@@ -58,3 +58,4 @@ class Bot(db.Model):
             self.access_token = access_token
         if secret_token:
             self.secret_token = secret_token
+        self.update_at = datetime.now()

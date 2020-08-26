@@ -23,14 +23,10 @@
             {% if bot.url %}value="{{ bot.url }}"{% endif %}>
 
         <label for="location">ロケーション</label>
-        <textarea name="location" id="location">
-                {% if bot.location %}{{ bot.location }}{% endif %}
-        </textarea>
+        <textarea name="location" id="location">{% if bot.location %}{{ bot.location }}{% endif %}</textarea>
 
         <label for="description">自己紹介欄</label>
-        <textarea name="description" id="description">
-            {% if bot.description %}{{ bot.description }}{% endif %}
-        </textarea>
+        <textarea name="description" id="description">{% if bot.description %}{{ bot.description }}{% endif %}</textarea>
 
         <label for="link_color">プロフィールリンクの色</label>
         <input 
