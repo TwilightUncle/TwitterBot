@@ -10,7 +10,7 @@ from app.views.common import set_session_message, getHttpErrorText, allowed_file
 from app.views.auth import login_required, is_staff
 from lib.twitter import usersShow
 
-from app.views.bot.edit import saveImage, sendProfileImageForTwitter
+from app.views.bot.edit import saveImage, sendProfileImageForTwitter, sendProfileDataForTwitter
 
 
 app = Blueprint('bot', __name__)
@@ -36,10 +36,31 @@ def edit(bot_id:int):
     if request.method == 'POST':
         error = []
 
+        # get params
+        profile_name                    = request.form.get('profile_name')
+        url                             = request.form.get('url')
+        location                        = request.form.get('location')
+        description                     = request.form.get('description')
+
+        # get files
         profile_image                   = request.files.get('profile_image')
         profile_image_saved_filename    = ''
         background_image                = request.files.get('background_image')
         background_image_saved_filename = ''
+
+        # パラメータチェック
+        max_len = 20
+        if profile_name and len(profile_name) > max_len:
+            error.append(f'プロフィール名の入力文字数は{max_len}文字以内にしてください。')
+        max_len = 100
+        if url and len(url) > max_len:
+            error.append(f'プロフィールに関連付けるurlの入力文字数は{max_len}文字以内にしてください。')
+        max_len = 30
+        if location and len(location) > max_len:
+            error.append(f'ロケーションの入力文字数は{max_len}文字以内にしてください')
+        max_len = 160
+        if description and len(description) > max_len:
+            error.append(f'自己紹介欄の入力文字数は{max_len}文字以内にしてください')
 
         # アップロードファイルチェック
         if profile_image and not allowed_file(profile_image):
@@ -48,11 +69,15 @@ def edit(bot_id:int):
             error.append('プロフィール背景画像に想定していない種類のファイルが送信されました。')
 
         if not error:
+            # プロフィール情報をツイッターへ送信
+            error = sendProfileDataForTwitter(bot, error, profile_name, url, location, description)
+
             # アップロードファイル保存
             profile_image_saved_filename, background_image_saved_filename = saveImage(bot_id, profile_image, background_image)
 
             # アップロードファイルをツイッターへ送信
             error = sendProfileImageForTwitter(bot, error, profile_image_saved_filename, background_image_saved_filename)
+        
 
         if not error:
             bot.profile_image_path = profile_image_saved_filename
