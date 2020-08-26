@@ -18,7 +18,9 @@ class Bot(db.Model):
     description             = db.Column(db.String(160), comment='twitterプロフィールの自己紹介')
     link_color              = db.Column(db.String(6), comment='twitterプロフィールに関連付けるリンクの色')
     profile_image_path      = db.Column(db.Text, comment='twitterプロフィール画像のファイルパス')
+    profile_image_url       = db.Column(db.Text, comment='twitterプロフィール画像のurl')
     background_image_path   = db.Column(db.Text, comment='twitterプロフィールの背景画像のファイルパス')
+    background_image_url    = db.Column(db.Text, comment='twitterプロフィールの背景画像のurl')
     access_token            = db.Column(db.Text, default='', nullable=False, comment='twitter認証ユーザー(bot)のアクセストークン')
     secret_token            = db.Column(db.Text, default='', nullable=False, comment='twitter認証ユーザー(bot)のシークレットトークン')
     create_at               = db.Column(db.DateTime, default=datetime.now, nullable=False)
@@ -37,7 +39,7 @@ class Bot(db.Model):
         return db.session.query(cls).all()
     
 
-    def update(self, screen_name=None, profile_name=None, url=None, location=None, description=None, link_color=None, profile_image_path=None, background_image_path=None, access_token=None, secret_token=None):
+    def update(self, screen_name=None, profile_name=None, url=None, location=None, description=None, link_color=None, profile_image_path=None, profile_image_url=None, background_image_path=None, background_image_url=None, access_token=None, secret_token=None):
         if screen_name:
             self.screen_name = screen_name
         if profile_name:
@@ -52,8 +54,12 @@ class Bot(db.Model):
             self.link_color = link_color
         if profile_image_path:
             self.profile_image_path = profile_image_path
+        if profile_image_url:
+            self.profile_image_url = profile_image_url
         if background_image_path:
             self.background_image_path = background_image_path
+        if background_image_url:
+            self.background_image_url = background_image_url
         if access_token:
             self.access_token = access_token
         if secret_token:
