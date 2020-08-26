@@ -9,9 +9,12 @@
     <ul>
         {% for item in bot_list %}
             <li>
-                <a href="{{ url_for('bot.edit', bot_id=item.id) }}">編集する</a>
-                <p>profile_name : {{ item.profile_name }}</p>
-                <p>screen_name : @{{ item.screen_name }}</p>
+                <img src="{{ item.profile_image_url }}" alt="プロフィール画像">
+                <div>
+                    <a href="{{ url_for('bot.edit', bot_id=item.id) }}">編集する</a>
+                    <p>profile_name : {{ item.profile_name }}</p>
+                    <p>screen_name : @{{ item.screen_name }}</p>
+                </div>
             </li>
         {% endfor %}
     </ul>

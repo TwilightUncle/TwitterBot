@@ -6,10 +6,12 @@ class Config:
     API_KEY = os.getenv('API_KEY') or 'dev'
     SQLALCHEMY_DATABASE_URI = 'sqlite:///app.db'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    STATIC_PATH = '/static'
+    STATIC_ROOT = 'app/static'
 
     # upload
-    UPLOAD_BOT_PROFILE_IMAGE_FOLDER = './uploads/image/bot/profile'
-    UPLOAD_BOT_PROFILE_BACKGROUND_IMAGE_FOLDER = './uploads/image/bot/profile_background'
+    UPLOAD_BOT_PROFILE_IMAGE_FOLDER = 'uploads/image/bot/profile'
+    UPLOAD_BOT_PROFILE_BACKGROUND_IMAGE_FOLDER = 'uploads/image/bot/profile_background'
     ALLOWED_MIMETYPES = set(['image/jpeg', 'image/png', 'image/gif'])
 
 class ProductionConfig(Config):

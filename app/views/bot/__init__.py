@@ -30,8 +30,6 @@ def index():
 def edit(bot_id:int):
     # post, get共通データ取得
     bot = db.session.query(Bot).filter(Bot.id==bot_id).first()
-    # ツイッターの情報と同期をかける
-    syncTwitterBotData(bot)
 
     if request.method == 'POST':
         error = []
@@ -80,8 +78,6 @@ def edit(bot_id:int):
         
 
         if not error:
-            bot.profile_image_path = profile_image_saved_filename
-            db.session.commit()
             flash('設定を変更しました。')
         else:
             # ゴミが残らないように画像削除
@@ -91,6 +87,9 @@ def edit(bot_id:int):
                 os.remove(background_image_saved_filename)
             db.session.rollback()
             flash('\n'.join(error))
+        
+    # ツイッターの情報と同期をかける
+    syncTwitterBotData(bot)
 
     return render_template('bot/edit.html', bot=bot)
 
@@ -107,11 +106,13 @@ def syncTwitterBotData(bot:Bot):
     else:
         # 同期した内容でDBを更新
         twitter_user_data = response.getUser()
+        profile_image_url = twitter_user_data.getProfileImageUrlHttps().replace('_normal', '')
         bot.update(
             screen_name=twitter_user_data.getScreenName(),
             profile_name=twitter_user_data.getUserName(),
             url=twitter_user_data.getUrl(),
             location=twitter_user_data.getLocation(),
-            description=twitter_user_data.getDescription()
+            description=twitter_user_data.getDescription(),
+            profile_image_url=profile_image_url
         )
         db.session.commit()
