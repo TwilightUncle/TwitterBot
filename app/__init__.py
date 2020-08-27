@@ -45,6 +45,8 @@ def create_app(config_name='default', db_path=None):
     app.register_blueprint(user.app, url_prefix='/user')
     from app.views import bot
     app.register_blueprint(bot.app, url_prefix='/bot')
+    from app.views import uploads
+    app.register_blueprint(uploads.app)
 
     app.add_url_rule('/', endpoint='index')
 
