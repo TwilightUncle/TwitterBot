@@ -5,7 +5,7 @@ from flask import (
 )
 from werkzeug.utils import secure_filename
 from app.database import db
-from app.models import Bot
+from app.models import Bot, ProfileImageHistory
 from app.views.common import set_session_message, getHttpErrorText, allowed_file
 from app.views.auth import login_required, is_staff
 from lib.twitter import usersShow
@@ -78,6 +78,12 @@ def edit(bot_id:int):
         
 
         if not error:
+            # ファイルパスがすでに設定されていたら、Historyのほうへ移す
+            if bot.profile_image_path:
+                profile_image_history = ProfileImageHistory()
+                profile_image_history.create(bot_id, bot.profile_image_path)
+            bot.profile_image_path = profile_image_saved_filename
+            db.session.commit()
             flash('設定を変更しました。')
         else:
             # ゴミが残らないように画像削除

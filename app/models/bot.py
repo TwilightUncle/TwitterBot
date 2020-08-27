@@ -26,7 +26,7 @@ class Bot(db.Model):
     create_at               = db.Column(db.DateTime, default=datetime.now, nullable=False)
     update_at               = db.Column(db.DateTime, default=datetime.now, nullable=False)
 
-    bots                    = db.relationship("ProfileImageHistory", backref="profile_image_historys")
+    profile_image_historys  = db.relationship("ProfileImageHistory", backref="profile_image_historys")
 
 
     @classmethod
