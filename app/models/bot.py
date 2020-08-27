@@ -26,11 +26,14 @@ class Bot(db.Model):
     create_at               = db.Column(db.DateTime, default=datetime.now, nullable=False)
     update_at               = db.Column(db.DateTime, default=datetime.now, nullable=False)
 
+    bots                    = db.relationship("ProfileImageHistory", backref="profile_image_historys")
+
 
     @classmethod
     def create(cls, owner_id, twitter_user_id, screen_name, access_token='', secret_token=''):
         bot = cls(owner_id=owner_id, twitter_user_id=twitter_user_id, screen_name=screen_name, access_token=access_token, secret_token=secret_token)
         db.session.add(bot)
+        db.session.flush()
         return bot
     
 

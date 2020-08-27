@@ -5,6 +5,7 @@ from datetime import datetime
 
 from app.models.user import User
 from app.models.bot import Bot
+from app.models.profile_image_history import ProfileImageHistory
 
 
 class TweetType(db.Model):
