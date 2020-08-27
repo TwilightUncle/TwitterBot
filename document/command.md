@@ -49,3 +49,6 @@ dbを新規作成した場合、下記を実行し、初期ユーザー名やパ
 ```
 $ flask job first_insert --twitter_screen_name [screen_name]
 ```
+
+# 本番・デバッグ環境について
+.envのFLASK_DEBUGを0にすると本番、1にするとテスト環境
