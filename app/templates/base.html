@@ -1,6 +1,11 @@
 <!doctype html>
 <title>{% block title %}{% endblock %} - application</title>
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+{% if config.DEBUG %}
+  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+{% else %}
+  <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+{% endif %}
 
 <nav>
   <h1>application</h1>
