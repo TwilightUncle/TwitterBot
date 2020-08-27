@@ -43,7 +43,7 @@ def saveUploadedImage(uploaded_file, save_dir_path) -> str:
     def generateFilename():
         r_str = generateRandomString(32)
         r_str += '.' + imghdr.what(uploaded_file.stream)
-        return os.path.join(save_dir_path, r_str)
+        return f"{save_dir_path}/{r_str}"
     
     # ディレクトリがなければディレクトリ作成
     if not os.path.isdir(save_dir_path):

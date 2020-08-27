@@ -29,5 +29,6 @@ nav ul li a, nav ul li span, header .action { display: block; padding: 0.5rem; }
 .content ul { padding-left: 0; }
 .content ul li { list-style: none; border: 1px solid #000; padding: 8px 16px; display: flex; }
 .content ul li img { width: 160px; margin-right: 16px;}
+.content img.current_profile_image { width: 160px; margin-bottom: 1em;}
 input.danger { color: #cc2f2e; }
 input[type=submit] { align-self: start; min-width: 10em; }

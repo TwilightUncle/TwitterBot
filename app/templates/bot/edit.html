@@ -41,6 +41,9 @@
             name="profile_image" 
             id="profile_image" 
             accept="image/jpeg,image/png">
+        {% if bot.profile_image_url %}
+            <img class="current_profile_image" src="{{ bot.profile_image_url }}" alt="現在のプロフィール画像">
+        {% endif %}
 
         <label for="background_image">プロフィール背景画像</label>
         <input 
@@ -48,6 +51,9 @@
             name="background_image" 
             id="background_image" 
             accept="image/jpeg,image/png">
+        {% if bot.background_image_url %}
+            <img src="{{ bot.background_image_url }}" alt="現在のプロフィール画像">
+        {% endif %}
         
         <input type="submit" value="送信">
     </form>
