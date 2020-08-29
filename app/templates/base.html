@@ -1,52 +1,66 @@
 <!doctype html>
-<title>{% block title %}{% endblock %} - application</title>
-<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-{% if config.DEBUG %}
-  <script src="{{ url_for('static', filename='js/vue.js') }}"></script>
-{% else %}
-  <script src="{{ url_for('static', filename='js/vue.min.js') }}"></script>
-{% endif %}
-
-<nav>
-  <h1>application</h1>
-  <ul>
-    {% if g.user %}
-      <li><span>{{ g.user['name'] }}さん、ようこそ！</span></li>
-      <li><a href="{{ url_for('auth.logout') }}">ログアウト</a></li>
-    {% else %}
-      <li><span>ゲストさん、ようこそ！</span></li>
-      <li><a href="{{ url_for('auth.login') }}">ログイン</a></li>
-    {% endif %}
-  </ul>
-</nav>
-
-<div class="out-frame">
-  <aside class="side-menu">
-    <h1>サイドメニュー</h1>
-    <ul>
-      {% if g.user %}
-        {% if g.user.is_admin %}
+<html>
+    <head>
+        <title>{% block title %}{% endblock %} - application</title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/spinner.css') }}">
+        {% if config.DEBUG %}
+            <script src="{{ url_for('static', filename='js/vue.js') }}"></script>
+        {% else %}
+            <script src="{{ url_for('static', filename='js/vue.min.js') }}"></script>
         {% endif %}
-        {% if g.user.is_staff %}
-          <li><a href="{{ url_for('auth.register') }}">新規ユーザー登録</a></li>
-          <li><a href="{{ url_for('bot.index') }}">bot 編集トップ</a></li>
-        {% endif %}
-        <li><a href="{{ url_for('auth.edit') }}">アカウント情報を編集</a></li>
-        <li><a href="{{ url_for('auth.delete') }}" onclick="return confirm('ほんとに削除しますか？');">このアカウントを削除する</a></li>
-        <li><a href="{{ url_for('user.twitter_account') }}">ツイッターアカウント登録</a></li>
-      {% else %}
-        {# <li><a href="{{ url_for('auth.register') }}">ユーザー登録</a></li> #}
-      {% endif %}
-    </ul>
-  </aside>  
+        <script src="{{ url_for('static', filename='js/main.js') }}" type="module"></script>
+        {% block optional_js %}{% endblock %}
+    </head>
 
-  <section class="content">
-    <header>
-      {% block header %}{% endblock %}
-    </header>
-    {% for message in get_flashed_messages() %}
-      <div class="flash">{{ message }}</div>
-    {% endfor %}
-    {% block content %}{% endblock %}
-  </section>
-</div>
+    <body>
+        <div id="app">
+            <nav>
+                <h1>application</h1>
+                <ul>
+                    {% if g.user %}
+                        <li><span>{{ g.user['name'] }}さん、ようこそ！</span></li>
+                        <li><a href="{{ url_for('auth.logout') }}">ログアウト</a></li>
+                    {% else %}
+                        <li><span>ゲストさん、ようこそ！</span></li>
+                        <li><a href="{{ url_for('auth.login') }}">ログイン</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+
+            <div class="out-frame">
+                <aside class="side-menu">
+                    <h1>サイドメニュー</h1>
+                    <ul>
+                        {% if g.user %}
+                            {% if g.user.is_admin %}
+                            {% endif %}
+                            {% if g.user.is_staff %}
+                                <li><a href="{{ url_for('auth.register') }}">新規ユーザー登録</a></li>
+                                <li><a href="{{ url_for('bot.index') }}">bot 編集トップ</a></li>
+                            {% endif %}
+                            <li><a href="{{ url_for('auth.edit') }}">アカウント情報を編集</a></li>
+                            <li><a href="{{ url_for('auth.delete') }}" onclick="return confirm('ほんとに削除しますか？');">このアカウントを削除する</a></li>
+                            <li><a href="{{ url_for('user.twitter_account') }}">ツイッターアカウント登録</a></li>
+                        {% else %}
+                            {# <li><a href="{{ url_for('auth.register') }}">ユーザー登録</a></li> #}
+                        {% endif %}
+                    </ul>
+                </aside>  
+
+                <section class="content">
+                    <header>
+                        {% block header %}{% endblock %}
+                    </header>
+                    {% for message in get_flashed_messages() %}
+                        <div class="flash">{{ message }}</div>
+                    {% endfor %}
+                    {% block content %}{% endblock %}
+                </section>
+            </div>
+
+            <button v-on:click="spinnerToggle">くるくる</button>
+            <component-spinner ref="spinner"></component-spinner>
+        </div>
+    </body>
+</html>
