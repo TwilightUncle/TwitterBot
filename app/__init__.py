@@ -16,7 +16,9 @@ def create_app(config_name='default', db_path=None):
 
         'default'       : DEV_CONF
         }
-    app = Flask(__name__, instance_relative_config=True)
+    app = Flask(__name__, instance_relative_config=True, static_folder='./vue/dist/static', template_folder='./vue/dist')
+    # 旧来の方spaにして問題なく動いたら削除予定
+    # app = Flask(__name__, instance_relative_config=True)
     app.config.from_object(config.get(config_name, DEV_CONF))
     app.config.from_pyfile('sensitive_data.cfg')
     if db_path:
