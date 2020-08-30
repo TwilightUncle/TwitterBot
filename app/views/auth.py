@@ -1,6 +1,6 @@
 import functools
 from flask import (
-    Blueprint, flash, g, redirect, render_template, request, session, url_for
+    Blueprint, flash, g, redirect, render_template, request, session, url_for, jsonify
 )
 from werkzeug.security import check_password_hash, generate_password_hash
 from app.database import db
@@ -106,6 +106,35 @@ def edit():
             flash('\n'.join(error))
 
     return render_template('auth/edit.html')
+
+
+@app.route('/sign-in', methods=['POST'])
+def signIn():
+    if request.method == 'POST':
+        # get input
+        username = request.json['user_name']
+        password = request.json['password']
+
+        # validate
+        user = db.session.query(User).filter(User.name==username).first()
+        error = []
+        if user is None:
+            error.append('Incorrect username.')
+        elif not check_password_hash(user.password, password):
+            error.append('Incorrect password.')
+        
+        # passed
+        if not error:
+            session.clear()
+            session['user_id'] = user.id
+
+            return jsonify({
+                'is_login': 'true'
+            })
+    
+    return jsonify({
+        'is_login': 'false'
+    })
 
 
 @app.route('/login', methods=('GET', 'POST'))

@@ -5,7 +5,7 @@
     <button v-on:click="spinnerToggle()"></button>
     <Spinner ref="spinner"> -->
     <div id="main-flame">
-
+      <SignInBox>
     </div>
   </div>
 </template>
@@ -13,12 +13,14 @@
 <script>
 // import HelloWorld from './components/HelloWorld.vue'
 // import Spinner from './components/Spinner.vue'
+import SignInBox from './components/SignInBox.vue'
 
 export default {
   name: 'App',
   components: {
     // HelloWorld,
-    // Spinner
+    // Spinner,
+    SignInBox
   },
   methods: {
     spinnerToggle: function () {
